@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	client.Something()
+	client.RunShell("127.0.0.1", "1337")
 }
