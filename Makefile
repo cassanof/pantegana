@@ -16,5 +16,8 @@ build-server:
 		go build -o server.bin; \
 		mv server.bin $(pantegana-dir)/out/server.bin;
 
+run:
+	go run ./main/server/main.go
+
 clean:
 	rm -fr ./out
