@@ -1,3 +1,3 @@
-# Pantegana - a RAT coded in Go
+# Pantegana - a RAT/Botnet coded in Go
 FOR EDUCATIONAL USE ONLY
 
