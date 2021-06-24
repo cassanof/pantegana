@@ -22,3 +22,9 @@
 
 # End of https://www.toptal.com/developers/gitignore/api/go
 
+# Pantegana spefic
+/cert/
+*.crt
+*.csr
+*.key
+cert.go
