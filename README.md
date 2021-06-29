@@ -1,5 +1,5 @@
 # Pantegana - a RAT/Botnet coded in Go
-FOR EDUCATIONAL USE ONLY
+FOR EDUCATIONAL AND RESEARCH USE ONLY
 
 ## Features:
  - HTTPS covert channel for communications
