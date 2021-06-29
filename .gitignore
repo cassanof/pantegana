@@ -28,3 +28,4 @@
 *.csr
 *.key
 cert.go
+disabled/
