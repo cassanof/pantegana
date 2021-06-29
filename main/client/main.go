@@ -5,5 +5,7 @@ import (
 )
 
 func main() {
-	client.RunShell("127.0.0.1", "1337")
+	config := client.LoadClientConfig()
+
+	client.RunShell(config.Host, config.Port)
 }
