@@ -7,5 +7,5 @@ import (
 func main() {
 	config := client.LoadClientConfig()
 
-	client.RunShell(config.Host, config.Port)
+	client.RunClient(config.Host, config.Port)
 }
