@@ -29,3 +29,5 @@
 *.key
 cert.go
 disabled/
+uploads/
+downloads/
