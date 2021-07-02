@@ -33,7 +33,8 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(w, command)
 
 		if command == "quit" {
-			cli.Println("[+] Payload quit. Listening again...")
+			Sessions[index].Open = false
+			cli.Printf("[+] Session %d quit.\n", index)
 		}
 	}
 }

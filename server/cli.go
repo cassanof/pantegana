@@ -1,9 +1,9 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 
 	"github.com/desertbit/grumble"
 )
@@ -37,6 +37,7 @@ func init() {
 			return nil
 		},
 	})
+
 	cli.AddCommand(&grumble.Command{
 		Name: "exec",
 		Help: "executes a command to a session",
@@ -54,10 +55,12 @@ func init() {
 				return errors.New("Please define a session with -s")
 			}
 			session := c.Flags.Int("session")
-			fmt.Println(c.Args.String("cmd") + " + " + strconv.Itoa(c.Flags.Int("session")))
 
 			go func() {
-				Sessions[session].Cmd <- c.Args.String("cmd")
+				err := Sessions[session].WriteToCmd(c.Args.String("cmd"))
+				if err != nil {
+					cli.PrintError(err)
+				}
 			}()
 
 			return nil
@@ -75,6 +78,20 @@ func init() {
 			}
 			cli.Println("[+] Listener successfully closed")
 			return nil
+		},
+	})
+
+	cli.AddCommand(&grumble.Command{
+		Name: "sessions",
+		Help: "Lists the sessions",
+
+		// TODO: make this fancy
+		Run: func(c *grumble.Context) error {
+			b, err := json.MarshalIndent(Sessions, "", "  ")
+			if err == nil {
+				fmt.Println(string(b))
+			}
+			return err
 		},
 	})
 

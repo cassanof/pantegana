@@ -1,12 +1,22 @@
 package server
 
+import (
+	"errors"
+
+	client "github.com/elleven11/pantegana/client"
+)
+
 type Session struct {
-	Token string
-	Cmd   chan string
-	Open  bool
+	Token   string
+	Cmd     chan string
+	Open    bool
+	SysInfo client.SysInfo
 }
 
 var Sessions []Session
+
+// errors
+var ErrSessionIsNotOpen = errors.New("The requested session is not open.")
 
 func CreateSession(token string) int {
 	// initialize sessions array
@@ -28,6 +38,14 @@ func CreateSession(token string) int {
 	Sessions = append(Sessions, session)
 
 	return len(Sessions) - 1
+}
+
+func (s *Session) WriteToCmd(command string) error {
+	if s.Open == false {
+		return ErrSessionIsNotOpen
+	}
+	s.Cmd <- command
+	return nil
 }
 
 func FindSessionIndexByToken(token string) int {
