@@ -37,3 +37,23 @@ clean:
 		rm -fr ./cert; \
 		rm -f ./server/cert.go; \
 		rm -f ./client/cert.go;
+
+run-client:
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		sed -i "/^package main/c\package client" cert.go; \
+		cd ../main/client/; \
+		go build -o client.bin; \
+		mv client.bin $(pantegana-dir)/out/client.bin; \
+		$(pantegana-dir)/out/client.bin;
+
+build-server:
+	mkdir -p out; \
+		cd ./server/; \
+		go generate; \
+		sed -i "/^package main/c\package server" cert.go; \
+		cd ../main/server; \
+		go build -o server.bin; \
+		mv server.bin $(pantegana-dir)/out/server.bin; \
+		$(pantegana-dir)/out/server.bin;
