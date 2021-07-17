@@ -28,6 +28,7 @@
 *.csr
 *.key
 cert.go
+*.ignore.*
 disabled/
 uploads/
 downloads/
