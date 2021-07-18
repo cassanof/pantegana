@@ -18,7 +18,7 @@ var Sessions []Session
 // errors
 var ErrSessionIsNotOpen = errors.New("The requested session is not open.")
 
-func CreateSession(token string) int {
+func CreateSession(token string) (int, bool) {
 	// initialize sessions array
 	if Sessions == nil {
 		Sessions = make([]Session, 0)
@@ -26,7 +26,7 @@ func CreateSession(token string) int {
 
 	index := FindSessionIndexByToken(token)
 	if index != -1 {
-		return index
+		return index, false
 	}
 
 	session := Session{
@@ -37,7 +37,7 @@ func CreateSession(token string) int {
 
 	Sessions = append(Sessions, session)
 
-	return len(Sessions) - 1
+	return len(Sessions) - 1, true
 }
 
 func (s *Session) WriteToCmd(command string) error {
