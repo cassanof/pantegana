@@ -2,7 +2,7 @@
 
 pantegana-dir := $(shell pwd)
 
-all: gencert build-client build-server
+all: gencert build-client-nix build-client-win build-server
 
 # feel free to change the cert's details in -subj.
 gencert:
@@ -14,7 +14,7 @@ gencert:
 	
 
 # run gencerts before building client and server singularlty.
-build-client:
+build-client-nix:
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
@@ -22,6 +22,15 @@ build-client:
 		cd ../main/client/; \
 		go build -o client.bin; \
 		mv client.bin $(pantegana-dir)/out/client.bin;
+
+build-client-win:
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		sed -i "/^package main/c\package client" cert.go; \
+		cd ../main/client/; \
+		GOOS=windows GOARCH=amd64 go build -o client.exe; \
+		mv client.exe $(pantegana-dir)/out/client.exe;
 
 build-server:
 	mkdir -p out; \
@@ -48,7 +57,7 @@ run-client:
 		mv client.bin $(pantegana-dir)/out/client.bin; \
 		$(pantegana-dir)/out/client.bin;
 
-build-server:
+run-server:
 	mkdir -p out; \
 		cd ./server/; \
 		go generate; \
