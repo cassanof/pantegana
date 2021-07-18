@@ -1,3 +1,6 @@
+// This file contains secondary handlers.
+// Secondary handlers are all handlers that are not GetCmd and CmdOutput
+
 package server
 
 import (
@@ -8,8 +11,6 @@ import (
 	"os"
 	"strconv"
 )
-
-// TODO: fix this mess
 
 // FileUpload handles the /upload endpoint.
 func FileUpload(w http.ResponseWriter, req *http.Request) {
@@ -79,3 +80,5 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	fmt.Println("[+] Successfully downloaded file")
 	fmt.Fprintf(w, "Successfully downloaded file")
 }
+
+// GetSysinfo handles the /sysinfo endpoint.
