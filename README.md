@@ -29,7 +29,7 @@ To build the program you will need `openssl` and `go-bindata`.
 Use: `go get -u github.com/go-bindata/go-bindata/...`  
 
 When running `make` you will need to specify any external IP or domain to include in the SSL certificate.  
-***This is done to prevent people stealing your binary and using it for malicious reasons.***  
+***This is done to prevent people stealing your binary and using it with malicious intent.***  
 Example: `make IP=1.1.1.1 DOMAIN=example.com`.  
 If you do not want to specify an IP or a domain, use `127.0.0.1` and `localhost` respectively.  
 Example: `make IP=127.0.0.1 DOMAIN=localhost`    
