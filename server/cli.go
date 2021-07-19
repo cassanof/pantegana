@@ -1,9 +1,7 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 
 	"github.com/desertbit/grumble"
 )
@@ -87,11 +85,8 @@ func init() {
 
 		// TODO: make this fancy
 		Run: func(c *grumble.Context) error {
-			b, err := json.MarshalIndent(Sessions, "", "  ")
-			if err == nil {
-				fmt.Println(string(b))
-			}
-			return err
+			PrettyPrintSessions()
+			return nil
 		},
 	})
 
