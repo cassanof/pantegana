@@ -1,7 +1,10 @@
 package server
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 
 	client "github.com/elleven11/pantegana/client"
 )
@@ -55,4 +58,20 @@ func FindSessionIndexByToken(token string) int {
 		}
 	}
 	return -1
+}
+
+func PrettyPrintSessions() {
+	header := "||                          Sessions                          ||"
+	spacer := strings.Repeat("=", len(header))
+	output := fmt.Sprintf("%s\n%s\n%s\n", spacer, header, spacer)
+	for i, session := range Sessions {
+		if session.Open {
+			fragment := fmt.Sprintf("|| ID: %d - Token: %s", i, session.Token)
+			sessionInfo := fmt.Sprintf("%s%s||\n%s\n", fragment, strings.Repeat(" ", len(header)-len(fragment)-2), spacer)
+			json, _ := json.MarshalIndent(session.SysInfo, "||", "\t")
+			sessionInfo = fmt.Sprintf("%s||%s\n%s\n", sessionInfo, json, spacer)
+			output += sessionInfo
+		}
+	}
+	cli.Printf("%s", output)
 }
