@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"sync"
 )
 
 type SysInfo struct {
@@ -30,32 +31,44 @@ func GetCurrentSysInfo() SysInfo {
 	return clientSysInfo
 }
 
-func (i *SysInfo) fingerprintLinux() {
-	out, err := exec.Command("uname", "-rn").Output()
-	if err == nil {
-		split := strings.SplitN(trim(out), " ", 2)
-		i.Name = split[0]
-		i.Kernel = split[1]
-	}
-	out, err = exec.Command("lsb_release", "-d").Output()
-	if err == nil {
-		i.Distro = strings.SplitN(trim(out), "\t", 2)[1]
-	}
-	out, err = exec.Command("whoami").Output()
-	if err == nil {
-		i.User.Name = trim(out)
-	}
-	out, err = exec.Command("id", "-u").Output()
-	if err == nil {
-		i.User.Id = trim(out)
-	}
-	out, err = exec.Command("groups").Output()
-	if err == nil {
-		i.User.Groups = trim(out)
-	}
-
-	dbg, _ := json.MarshalIndent(i, "", " ")
-	log.Println(string(dbg))
+func (i *SysInfo) fingerprintLinux(wg *sync.WaitGroup) {
+	go func() {
+		out, err := exec.Command("uname", "-rn").Output()
+		if err == nil {
+			split := strings.SplitN(trim(out), " ", 2)
+			i.Name = split[0]
+			i.Kernel = split[1]
+		}
+		defer wg.Done()
+	}()
+	go func() {
+		out, err := exec.Command("lsb_release", "-d").Output()
+		if err == nil {
+			i.Distro = strings.SplitN(trim(out), "\t", 2)[1]
+		}
+		defer wg.Done()
+	}()
+	go func() {
+		out, err := exec.Command("whoami").Output()
+		if err == nil {
+			i.User.Name = trim(out)
+		}
+		defer wg.Done()
+	}()
+	go func() {
+		out, err := exec.Command("id", "-u").Output()
+		if err == nil {
+			i.User.Id = trim(out)
+		}
+		defer wg.Done()
+	}()
+	go func() {
+		out, err := exec.Command("groups").Output()
+		if err == nil {
+			i.User.Groups = trim(out)
+		}
+		defer wg.Done()
+	}()
 }
 
 // TODO: fingerprintWindows
@@ -73,6 +86,8 @@ func RunFingerprinter() {
 		Arch: runtime.GOARCH,
 	}
 
+	var wg sync.WaitGroup
+
 	switch runtime.GOOS {
 	case "windows":
 		go clientSysInfo.fingerprintWindows()
@@ -80,8 +95,15 @@ func RunFingerprinter() {
 		go clientSysInfo.fingerprintOsx()
 	default:
 		// probably some kind of bsd so...
-		go clientSysInfo.fingerprintLinux()
+		wg.Add(5) // Set here the number of commands to execute
+		go clientSysInfo.fingerprintLinux(&wg)
 	}
+
+	// Wait for commands to finish
+	wg.Wait()
+
+	dbg, _ := json.MarshalIndent(clientSysInfo, "", " ")
+	log.Println(string(dbg))
 }
 
 // Helper func to trim '/n' and convert byte arr to string

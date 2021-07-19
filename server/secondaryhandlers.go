@@ -88,13 +88,20 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 func GetSysinfo(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		index := FindSessionIndexByToken(req.Header.Get("token"))
+		if index == -1 {
+			cli.Printf("[-] Error while getting session from token: %s\n", ErrUnrecognizedSessionToken)
+			return
+		}
 		cli.Println("[+] Got system information from session: ", index)
 		body, _ := ioutil.ReadAll(req.Body)
 		defer req.Body.Close()
 
-		err := json.Unmarshal(body, &Sessions[index].SysInfo)
+		sessionObj, _ := GetSession(index)
+
+		err := json.Unmarshal(body, &sessionObj.SysInfo)
 		if err != nil {
 			cli.Printf("[-] Error while parsing the JSON system information: %s\n", err)
+			return
 		}
 
 		w.Header().Set("Connection", "close")

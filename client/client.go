@@ -124,9 +124,9 @@ func RunClient(host string, port int) {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	client := ClientSetup()
-
 	RunFingerprinter()
+
+	client := ClientSetup()
 
 	for {
 		cmd, hoststr := RequestCommand(client, host, port)

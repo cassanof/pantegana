@@ -20,7 +20,7 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 
 		index, isNew := CreateSession(token)
 
-		session := Sessions[index]
+		sessionObj, _ := GetSession(index)
 
 		if isNew {
 			cli.Printf("[+] New connection with session id: %d\n", index)
@@ -28,20 +28,27 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 			fmt.Fprint(w, "__sysinfo__")
 		} else {
 			cli.Printf("[+] Got request for cmd from session id: %d\n", index)
+
+			// Set session as open
+			sessionObj.Open = true
+
 			var command string
 
 			for {
 				select {
-				case str := <-session.Cmd:
+				case str := <-sessionObj.Cmd:
 					command = str
-					fmt.Println(command)
+					fmt.Fprintf(w, command)
+				case <-req.Context().Done():
+					cli.Printf("[-] Connection closed from session: %d\n", index)
+					sessionObj.Open = false
+					w.WriteHeader(444) // 444 - Connection Closed Without Response
 				}
 				break
 			}
-			fmt.Fprintf(w, command)
 
 			if command == "quit" {
-				Sessions[index].Open = false
+				sessionObj.Open = false
 				cli.Printf("[+] Session %d quit.\n", index)
 			}
 		}
