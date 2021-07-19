@@ -4,9 +4,16 @@ FOR EDUCATIONAL AND RESEARCH USE ONLY
 ## Features:
  - HTTPS covert channel for communications
  - Undetected by AVs by nature
- - Direct command exectution (not using bash or sh)
+ - Direct command execution (not using bash or sh)
  - Multiple sessions handling
  - File Upload/Download
+ - System fingerprinting
+
+## TODO:
+ - Full Windows and OSx integration (currently it's partial)
+ - Gracefully closing sessions server-side on client-side crash
+ - bash/cmd/psh shell dropping
+ - TOR routing?
 
 ## Usage:
 To build the program you will need `openssl` and `go-bindata`.  
