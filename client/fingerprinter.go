@@ -14,8 +14,9 @@ type SysInfo struct {
 	Name string `json:"name"`
 
 	User struct {
-		Name string `json:"name"`
-		Id   string `json:"uid,omitempty"` // *nix only
+		Name   string `json:"name"`
+		Id     string `json:"uid,omitempty"`    // *nix only
+		Groups string `json:"groups,omitempty"` // *nix only
 	}
 
 	// *nix only
@@ -36,6 +37,10 @@ func (i *SysInfo) fingerprintLinux() {
 		i.Name = split[0]
 		i.Kernel = split[1]
 	}
+	out, err = exec.Command("lsb_release", "-d").Output()
+	if err == nil {
+		i.Distro = strings.SplitN(trim(out), "\t", 2)[1]
+	}
 	out, err = exec.Command("whoami").Output()
 	if err == nil {
 		i.User.Name = trim(out)
@@ -43,6 +48,10 @@ func (i *SysInfo) fingerprintLinux() {
 	out, err = exec.Command("id", "-u").Output()
 	if err == nil {
 		i.User.Id = trim(out)
+	}
+	out, err = exec.Command("groups").Output()
+	if err == nil {
+		i.User.Groups = trim(out)
 	}
 
 	dbg, _ := json.MarshalIndent(i, "", " ")
@@ -65,8 +74,6 @@ func RunFingerprinter() {
 	}
 
 	switch runtime.GOOS {
-	case "linux":
-		go clientSysInfo.fingerprintLinux()
 	case "windows":
 		go clientSysInfo.fingerprintWindows()
 	case "darwin":
