@@ -18,4 +18,5 @@ func InitRoutes() {
 	http.HandleFunc("/cmdoutput", CmdOutput)
 	http.HandleFunc("/upload", FileUpload)
 	http.HandleFunc("/download", FileDownload)
+	http.HandleFunc("/sysinfo", GetSysinfo)
 }
