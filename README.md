@@ -23,6 +23,7 @@
  - Gracefully closing sessions server-side on client-side crash
  - bash/cmd/psh shell dropping
  - TOR routing?
+ - Implement Twitter-Transfer-Protocol (<a href="https://github.com/elleven11/twitter-transfer-protocol" target="_blank">ttp</a>)
 
 ## Building:
 To build the program you will need `openssl` and `go-bindata`.  
