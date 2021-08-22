@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func Start() {
+func RunServer() {
 	InitRoutes()
 	err := cli.Run()
 	if err != nil {
