@@ -96,7 +96,7 @@ func init() {
 		Aliases: []string{"c"},
 
 		Run: func(c *grumble.Context) error {
-			err := CloseServer()
+			err := CloseListener()
 			if err != nil {
 				return err
 			}

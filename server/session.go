@@ -13,6 +13,7 @@ type Session struct {
 	Token   string
 	Cmd     chan string
 	Open    bool
+	IP      string
 	SysInfo client.SysInfo
 }
 
@@ -24,7 +25,7 @@ var ErrSessionDoesNotExist = errors.New("The requested session does not exist.")
 var ErrUnrecognizedSessionToken = errors.New("The requested session token does not corelate with any current sessions.")
 var ErrUndefinedSession = errors.New("Please define a session with -s.")
 
-func CreateSession(token string) (int, bool) {
+func CreateSession(token string, ip string) (int, bool) {
 	// initialize sessions array
 	if sessions == nil {
 		sessions = make([]Session, 0)
@@ -38,6 +39,7 @@ func CreateSession(token string) (int, bool) {
 	session := Session{
 		Token: token,
 		Cmd:   make(chan string),
+		IP:    ip,
 	}
 
 	sessions = append(sessions, session)
@@ -75,7 +77,7 @@ func PrettyPrintSessions() {
 	output := fmt.Sprintf("%s\n%s\n%s\n", spacer, header, spacer)
 	for i, session := range sessions {
 		if session.Open {
-			fragment := fmt.Sprintf("|| ID: %d - Token: %s", i, session.Token)
+			fragment := fmt.Sprintf("|| ID: %d - Token: %s - IP: %s", i, session.Token, session.IP)
 			sessionInfo := fmt.Sprintf("%s%s||\n%s\n", fragment, strings.Repeat(" ", len(header)-len(fragment)-2), spacer)
 			json, _ := json.MarshalIndent(session.SysInfo, "||", "\t")
 			sessionInfo = fmt.Sprintf("%s||%s\n%s\n", sessionInfo, json, spacer)
