@@ -17,10 +17,10 @@
  - Multiple sessions handling
  - File Upload/Download
  - System fingerprinting
+ - Gracefully closing sessions server-side on client-side crash
 
 ## TODO:
  - Full Windows and OSx integration (currently it's partial)
- - Gracefully closing sessions server-side on client-side crash
  - bash/cmd/psh shell dropping
  - TOR routing?
  - Implement Twitter-Transfer-Protocol (<a href="https://github.com/elleven11/twitter-transfer-protocol" target="_blank">ttp</a>)
@@ -34,5 +34,6 @@ When running `make` you will need to specify any external IP or domain to includ
 Example: `make IP=1.1.1.1 DOMAIN=example.com`.  
 If you do not want to specify an IP or a domain, use `127.0.0.1` and `localhost` respectively.  
 Example: `make IP=127.0.0.1 DOMAIN=localhost`    
+You will find your client and server builds in the `out` directory.  
 
 Check Makefile for different build/running options
