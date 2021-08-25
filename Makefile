@@ -18,6 +18,25 @@ gencert:
 	
 
 # run gencerts before building client and server singularlty.
+
+build-client-nix32: # does not get run by `all:`
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		sed -i "/^package main/c\package client" cert.go; \
+		cd ../main/client/; \
+		GOARCH=386 go build -o client.bin; \
+		mv client.bin $(pantegana-dir)/out/client.bin;
+
+build-client-win32: # does not get run by `all:`
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		sed -i "/^package main/c\package client" cert.go; \
+		cd ../main/client/; \
+		GOOS=windows GOARCH=386 go build -o client.exe; \
+		mv client.exe $(pantegana-dir)/out/client.exe;
+
 build-client-nix:
 	mkdir -p out;
 		cd ./client/; \
