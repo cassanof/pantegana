@@ -82,7 +82,7 @@ func PrettyPrintSessions() {
 		if session.Open {
 			fragment := fmt.Sprintf("|| ID: %d - Token: %s - IP: %s", i, session.Token, session.IP)
 			sessionInfo := fmt.Sprintf("%s%s||\n%s\n", fragment, strings.Repeat(" ", len(header)-len(fragment)-2), spacer)
-			json, _ := json.MarshalIndent(session.SysInfo, "||", "\t")
+			json, _ := json.MarshalIndent(session.SysInfo, "", "\t")
 			sessionInfo = fmt.Sprintf("%s||%s\n%s\n", sessionInfo, json, spacer)
 			output += sessionInfo
 		}
