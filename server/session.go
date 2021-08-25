@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
 	client "github.com/elleven11/pantegana/client"
@@ -25,7 +26,9 @@ var ErrSessionDoesNotExist = errors.New("The requested session does not exist.")
 var ErrUnrecognizedSessionToken = errors.New("The requested session token does not corelate with any current sessions.")
 var ErrUndefinedSession = errors.New("Please define a session with -s.")
 
-func CreateSession(token string, ip string) (int, bool) {
+func CreateSession(req *http.Request) (int, bool) {
+	token := req.Header.Get("token")
+
 	// initialize sessions array
 	if sessions == nil {
 		sessions = make([]Session, 0)
@@ -39,7 +42,7 @@ func CreateSession(token string, ip string) (int, bool) {
 	session := Session{
 		Token: token,
 		Cmd:   make(chan string),
-		IP:    ip,
+		IP:    GetIP(req),
 	}
 
 	sessions = append(sessions, session)
