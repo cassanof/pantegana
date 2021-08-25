@@ -1,6 +1,10 @@
+SHELL := /bin/bash
 .PHONY: all clean
 
 pantegana-dir := $(shell pwd)
+
+DOMAIN = localhost
+IP = 127.0.0.1
 
 all: gencert build-client-nix build-client-win build-server
 

@@ -32,8 +32,8 @@ Use: `go get -u github.com/go-bindata/go-bindata/...`
 When running `make` you will need to specify any external IP or domain to include in the SSL certificate.  
 ***This is done to prevent people stealing your binary and using it with malicious intent.***  
 Example: `make IP=1.1.1.1 DOMAIN=example.com`.  
-If you do not want to specify an IP or a domain, use `127.0.0.1` and `localhost` respectively.  
-Example: `make IP=127.0.0.1 DOMAIN=localhost`    
+By default the Makefile sets `IP=127.0.0.1` and `DOMAIN=localhost`. If you want to keep that you can just ommit the variables in the make command.  
+Example: `make`    
 You will find your client and server builds in the `out` directory.  
 
-Check Makefile for different build/running options
+Check Makefile for additional build/running options  
