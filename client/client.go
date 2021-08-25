@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
@@ -36,10 +37,16 @@ var ClientToken string
 func ClientSetup() *http.Client {
 	// set up own cert pool
 	tlsConfig := &tls.Config{RootCAs: x509.NewCertPool()}
-	transport := &http.Transport{TLSClientConfig: tlsConfig}
+	transport := &http.Transport{
+		TLSClientConfig:     tlsConfig,
+		TLSHandshakeTimeout: 10 * time.Second,
+		Dial: (&net.Dialer{
+			Timeout: 10 * time.Second,
+		}).Dial,
+	}
 	client := &http.Client{
 		Transport: transport,
-		Timeout:   30 * time.Minute,
+		Timeout:   30 * time.Minute, // The client tries to reconnect anyways...
 	}
 
 	// load trusted cert path
