@@ -5,13 +5,9 @@ type config struct {
 	Port int
 }
 
-// TODO: Obfuscate client creds with XOR or something
-func LoadClientConfig() config {
-	var cfg config
+func LoadClientConfig(host string, port int) *config {
 
-	// Insert here your configuration for the client.
-	cfg.Host = "127.0.0.1"
-	cfg.Port = 1337
+	cfg := config{host, port}
 
-	return cfg
+	return &cfg
 }
