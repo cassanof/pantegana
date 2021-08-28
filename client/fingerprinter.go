@@ -32,41 +32,27 @@ func GetCurrentSysInfo() SysInfo {
 }
 
 func (i *SysInfo) fingerprintLinux(wg *sync.WaitGroup) {
+	wg.Add(5) // Set here the number of commands to execute
 	go func() {
-		out, err := exec.Command("uname", "-rn").Output()
-		if err == nil {
-			split := strings.SplitN(trim(out), " ", 2)
-			i.Name = split[0]
-			i.Kernel = split[1]
-		}
+		outs := strings.SplitN(runCmdAndGetOutput(2, "uname", "-rn"), " ", 2)
+		i.Name = outs[0]
+		i.Kernel = outs[1]
 		defer wg.Done()
 	}()
 	go func() {
-		out, err := exec.Command("lsb_release", "-d").Output()
-		if err == nil {
-			i.Distro = strings.SplitN(trim(out), "\t", 2)[1]
-		}
+		i.Distro = strings.SplitN(runCmdAndGetOutput(3, "lsb_release", "-d"), "\t", 2)[1]
 		defer wg.Done()
 	}()
 	go func() {
-		out, err := exec.Command("whoami").Output()
-		if err == nil {
-			i.User.Name = trim(out)
-		}
+		i.User.Name = runCmdAndGetOutput(1, "whoami")
 		defer wg.Done()
 	}()
 	go func() {
-		out, err := exec.Command("id", "-u").Output()
-		if err == nil {
-			i.User.Id = trim(out)
-		}
+		i.User.Id = runCmdAndGetOutput(1, "id", "-u")
 		defer wg.Done()
 	}()
 	go func() {
-		out, err := exec.Command("groups").Output()
-		if err == nil {
-			i.User.Groups = trim(out)
-		}
+		i.User.Groups = runCmdAndGetOutput(1, "groups")
 		defer wg.Done()
 	}()
 }
@@ -94,9 +80,8 @@ func RunFingerprinter() {
 	case "darwin":
 		go clientSysInfo.fingerprintOsx()
 	default:
-		// probably some kind of bsd so...
-		wg.Add(5) // Set here the number of commands to execute
-		go clientSysInfo.fingerprintLinux(&wg)
+		// probably some kind of *nix so...
+		clientSysInfo.fingerprintLinux(&wg)
 	}
 
 	// Wait for commands to finish
@@ -104,6 +89,16 @@ func RunFingerprinter() {
 
 	dbg, _ := json.MarshalIndent(clientSysInfo, "", " ")
 	log.Println(string(dbg))
+}
+
+// Helper func to execute commadns, get output and handle errors
+func runCmdAndGetOutput(expect int, cmd string, args ...string) string {
+	out, err := exec.Command(cmd, args...).Output()
+	// if there is an error, it will return "unknown" as many times as the expect arg is defined as
+	if err != nil {
+		return "unknown" + strings.Repeat(" unknown\t", expect-1)
+	}
+	return trim(out)
 }
 
 // Helper func to trim '/n' and convert byte arr to string
