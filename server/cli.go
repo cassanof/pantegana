@@ -41,12 +41,12 @@ func init() {
 		Aliases: []string{"l"},
 
 		Flags: func(f *grumble.Flags) {
-			f.Int("p", "port", 1337, "the port to listen (443 needs root but reccomend)")
+			f.Int("p", "port", 1337, "the port to listen (443 needs root privileges)")
 			f.BoolL("notls", false, "set to remove encryption. Use mostly in testing.")
 		},
 
 		Args: func(a *grumble.Args) {
-			a.String("host", "a host to listen to (use either a domain or ip)", grumble.Default("localhost"))
+			a.String("host", `a host to listen to (for ipv6 put in square brackets. eg: "[::1]")`, grumble.Default("localhost"))
 		},
 
 		Run: func(c *grumble.Context) error {

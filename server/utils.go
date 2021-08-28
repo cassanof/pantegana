@@ -31,6 +31,5 @@ func GetIP(r *http.Request) string {
 	if forwarded != "" {
 		return forwarded
 	}
-	ip := strings.Split(r.RemoteAddr, ":")[0]
-	return ip
+	return r.RemoteAddr[0:strings.LastIndex(r.RemoteAddr, ":")]
 }
