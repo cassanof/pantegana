@@ -25,8 +25,8 @@ build-client-nix32: # does not get run by `all:`
 		go generate; \
 		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
-		GOARCH=386 go build -o client.bin; \
-		mv client.bin $(pantegana-dir)/out/client.bin;
+		GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s -w" -o client32.bin; \
+		mv client32.bin $(pantegana-dir)/out/client32.bin;
 
 build-client-win32: # does not get run by `all:`
 	mkdir -p out;
@@ -34,8 +34,8 @@ build-client-win32: # does not get run by `all:`
 		go generate; \
 		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
-		GOOS=windows GOARCH=386 go build -o client.exe; \
-		mv client.exe $(pantegana-dir)/out/client.exe;
+		GOOS=windows GOARCH=386 go build -o client32.exe; \
+		mv client32.exe $(pantegana-dir)/out/client32.exe;
 
 build-client-nix:
 	mkdir -p out;
@@ -43,7 +43,7 @@ build-client-nix:
 		go generate; \
 		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
-		go build -o client.bin; \
+		CGO_ENABLED=0 GOARCH=amd64 go build -ldflags="-s -w" -o client.bin; \
 		mv client.bin $(pantegana-dir)/out/client.bin;
 
 build-client-win:
@@ -61,7 +61,7 @@ build-server:
 		go generate; \
 		sed -i "/^package main/c\package server" cert.go; \
 		cd ../main/server; \
-		go build -o server.bin; \
+		CGO_ENABLED=0 go build -o server.bin; \
 		mv server.bin $(pantegana-dir)/out/server.bin;
 
 clean:
@@ -89,3 +89,6 @@ run-server:
 		go build -o server.bin; \
 		mv server.bin $(pantegana-dir)/out/server.bin; \
 		$(pantegana-dir)/out/server.bin;
+
+pack-client:
+	upx --brute ./out/client*.bin
