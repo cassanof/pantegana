@@ -70,7 +70,7 @@ func init() {
 
 		Run: func(c *grumble.Context) error {
 			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSession
+				return ErrUndefinedSessionInCLI
 			}
 			sessionId := c.Flags.Int("session")
 			sessionObj, err := GetSession(sessionId)
@@ -131,7 +131,7 @@ func init() {
 
 		Run: func(c *grumble.Context) error {
 			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSession
+				return ErrUndefinedSessionInCLI
 			}
 			sessionId := c.Flags.Int("session")
 			sessionObj, err := GetSession(sessionId)
@@ -156,8 +156,6 @@ func init() {
 		},
 	})
 
-	cli.Stdout()
-
 	cli.AddCommand(&grumble.Command{
 		Name:    "download",
 		Help:    "transfer a file from the server to a session (ends up in download dir)",
@@ -174,7 +172,7 @@ func init() {
 
 		Run: func(c *grumble.Context) error {
 			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSession
+				return ErrUndefinedSessionInCLI
 			}
 			sessionId := c.Flags.Int("session")
 			sessionObj, err := GetSession(sessionId)

@@ -47,19 +47,19 @@ func StartListener(host string, port int, noTLS bool) {
 
 	hoststr := fmt.Sprintf("%s:%d", host, port)
 
-	// start the server
-	cli.Printf("[+] Server listening on (%s)\n", hoststr)
+	// start the listener
+	cli.Printf("[+] Listening on (%s)\n", hoststr)
 	Listener = SetupListener(hoststr, noTLS)
 
+	var err error
 	if noTLS {
-		err := Listener.ListenAndServe()
-		if err != http.ErrServerClosed {
-			cli.PrintError(err)
-		}
+		err = Listener.ListenAndServe()
 	} else {
-		err := Listener.ListenAndServeTLS("", "")
-		if err != http.ErrServerClosed {
-			cli.PrintError(err)
-		}
+		err = Listener.ListenAndServeTLS("", "")
+	}
+
+	if err != http.ErrServerClosed {
+		cli.PrintError(err)
+		CloseListener()
 	}
 }
