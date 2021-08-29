@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/tls"
+	"errors"
 	"net/http"
 
 	"github.com/i582/cfmt/cmd/cfmt"
@@ -9,7 +10,7 @@ import (
 
 //go:generate go-bindata -o cert.go ../cert/...
 
-type listener struct {
+type Listener struct {
 	Cfg    *ListenerConfig
 	Server *http.Server
 }
@@ -20,9 +21,9 @@ type ListenerConfig struct {
 	Verbose   bool
 }
 
-var Listener *listener
+var listener *Listener = nil
 
-func (cfg *ListenerConfig) SetupListener() *listener {
+func (cfg *ListenerConfig) SetupListener() *Listener {
 	// read cert binary data from bundled assets
 	certData, err := Asset("../cert/server.crt")
 	if err != nil {
@@ -45,7 +46,7 @@ func (cfg *ListenerConfig) SetupListener() *listener {
 		server.TLSConfig = nil
 	}
 
-	return &listener{
+	return &Listener{
 		Cfg:    cfg,
 		Server: &server,
 	}
@@ -60,17 +61,32 @@ func StartListener(cfg *ListenerConfig) {
 
 	// start the listener
 	cli.Printf("[+] Listening on (%s)\n", cfg.Addr)
-	Listener = cfg.SetupListener()
+	listener = cfg.SetupListener()
 
 	var err error
 	if cfg.Plaintext {
-		err = Listener.Server.ListenAndServe()
+		err = listener.Server.ListenAndServe()
 	} else {
-		err = Listener.Server.ListenAndServeTLS("", "")
+		err = listener.Server.ListenAndServeTLS("", "")
 	}
 
 	if err != http.ErrServerClosed {
 		cli.PrintError(err)
 		defer CloseListener()
 	}
+}
+
+func CloseListener() error {
+	var err error
+	if listener != nil {
+		err = listener.Server.Close()
+		listener = nil
+	} else {
+		err = errors.New("There are no listeners running")
+	}
+	return err
+}
+
+func IsListening() bool {
+	return listener != nil
 }

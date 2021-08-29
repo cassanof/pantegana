@@ -5,7 +5,13 @@ import (
 )
 
 func main() {
-	config := client.LoadClientConfig("127.0.0.1", 1337)
 
-	client.RunClient(config.Host, config.Port)
+	cfg := client.ClientConfig{
+		Host:    "127.0.0.1",
+		Port:    1337,
+		HasTLS:  true, // for debug only
+		HasLogs: true, // disable this in "production"
+	}
+
+	client.RunClient(&cfg)
 }

