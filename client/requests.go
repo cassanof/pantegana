@@ -41,7 +41,7 @@ func RequestCommand(client *http.Client, host string, port int) (string, string)
 	if err != nil {
 		log.Printf("[-] Got error when requesting cmd: %s\n", err)
 		log.Println("Retrying in 5 seconds...")
-		if err == ErrHTTPResponse {
+		if strings.Contains(err.Error(), ErrHTTPResponse.Error()) {
 			// try with plaintext HTTP
 			hasTLS = false
 		}
