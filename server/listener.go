@@ -22,7 +22,7 @@ type ListenerConfig struct {
 
 var Listener *listener
 
-func SetupListener(cfg *ListenerConfig) *listener {
+func (cfg *ListenerConfig) SetupListener() *listener {
 	// read cert binary data from bundled assets
 	certData, err := Asset("../cert/server.crt")
 	if err != nil {
@@ -60,7 +60,7 @@ func StartListener(cfg *ListenerConfig) {
 
 	// start the listener
 	cli.Printf("[+] Listening on (%s)\n", cfg.Addr)
-	Listener = SetupListener(cfg)
+	Listener = cfg.SetupListener()
 
 	var err error
 	if cfg.Plaintext {
