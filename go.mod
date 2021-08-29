@@ -8,5 +8,5 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/i582/cfmt v1.4.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
-	golang.org/x/sys v0.0.0-20210616094352-59db8d763f22 // indirect
+	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
 )
