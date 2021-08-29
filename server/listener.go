@@ -2,7 +2,6 @@ package server
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/http"
 
 	"github.com/i582/cfmt/cmd/cfmt"
@@ -10,9 +9,20 @@ import (
 
 //go:generate go-bindata -o cert.go ../cert/...
 
-var Listener *http.Server
+type listener struct {
+	Cfg    *ListenerConfig
+	Server *http.Server
+}
 
-func SetupListener(host string, noTLS bool) *http.Server {
+type ListenerConfig struct {
+	Addr      string
+	Plaintext bool
+	Verbose   bool
+}
+
+var Listener *listener
+
+func SetupListener(cfg *ListenerConfig) *listener {
 	// read cert binary data from bundled assets
 	certData, err := Asset("../cert/server.crt")
 	if err != nil {
@@ -28,38 +38,39 @@ func SetupListener(host string, noTLS bool) *http.Server {
 	cert, err := tls.X509KeyPair(certData, keyData)
 	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
 	server := http.Server{
-		Addr:      host,
+		Addr:      cfg.Addr,
 		TLSConfig: tlsConfig,
 	}
-	if noTLS {
+	if cfg.Plaintext {
 		server.TLSConfig = nil
 	}
 
-	return &server
+	return &listener{
+		Cfg:    cfg,
+		Server: &server,
+	}
 }
 
-func StartListener(host string, port int, noTLS bool) {
+func StartListener(cfg *ListenerConfig) {
 	// check if a listener is already running
 	if IsListening() {
 		cli.Print(cfmt.Sprintln("{{[-] A listener is already running.}}::red"))
 		return
 	}
 
-	hoststr := fmt.Sprintf("%s:%d", host, port)
-
 	// start the listener
-	cli.Printf("[+] Listening on (%s)\n", hoststr)
-	Listener = SetupListener(hoststr, noTLS)
+	cli.Printf("[+] Listening on (%s)\n", cfg.Addr)
+	Listener = SetupListener(cfg)
 
 	var err error
-	if noTLS {
-		err = Listener.ListenAndServe()
+	if cfg.Plaintext {
+		err = Listener.Server.ListenAndServe()
 	} else {
-		err = Listener.ListenAndServeTLS("", "")
+		err = Listener.Server.ListenAndServeTLS("", "")
 	}
 
 	if err != http.ErrServerClosed {
 		cli.PrintError(err)
-		CloseListener()
+		defer CloseListener()
 	}
 }

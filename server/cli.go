@@ -19,20 +19,25 @@ var cli = grumble.New(&grumble.Config{
 	HelpSubCommands:       true,
 
 	Flags: func(f *grumble.Flags) {
-		f.Bool("v", "verbose", false, "enable verbose mode")
+		f.Bool("q", "quiet", false, "Disables ASCII start-up logo")
 	},
 })
 
 func init() {
-	cli.SetPrintASCIILogo(func(a *grumble.App) {
-		a.Println()
-		a.Println("   ___            _                               ")
-		a.Println("  / _ \\__ _ _ __ | |_ ___  __ _  __ _ _ __   __ _ ")
-		a.Println(" / /_)/ _` | '_ \\| __/ _ \\/ _` |/ _` | '_ \\ / _` |")
-		a.Println("/ ___/ (_| | | | | ||  __/ (_| | (_| | | | | (_| |")
-		a.Println("\\/    \\__,_|_| |_|\\__\\___|\\__, |\\__,_|_| |_|\\__,_|")
-		a.Println("                          |___/                   ")
-		a.Println()
+	cli.OnInit(func(a *grumble.App, flags grumble.FlagMap) error {
+		if !flags.Bool("quiet") {
+			cli.SetPrintASCIILogo(func(a *grumble.App) {
+				a.Println()
+				a.Println("   ___            _                               ")
+				a.Println("  / _ \\__ _ _ __ | |_ ___  __ _  __ _ _ __   __ _ ")
+				a.Println(" / /_)/ _` | '_ \\| __/ _ \\/ _` |/ _` | '_ \\ / _` |")
+				a.Println("/ ___/ (_| | | | | ||  __/ (_| | (_| | | | | (_| |")
+				a.Println("\\/    \\__,_|_| |_|\\__\\___|\\__, |\\__,_|_| |_|\\__,_|")
+				a.Println("                          |___/                   ")
+				a.Println()
+			})
+		}
+		return nil
 	})
 
 	cli.AddCommand(&grumble.Command{
@@ -42,7 +47,8 @@ func init() {
 
 		Flags: func(f *grumble.Flags) {
 			f.Int("p", "port", 1337, "the port to listen (443 needs root privileges)")
-			f.BoolL("notls", false, "set to remove encryption. Use mostly in testing.")
+			f.Bool("v", "verbose", false, "gives extra output information")
+			f.BoolL("plaintext", false, "set to remove encryption. Use mostly in testing.")
 		},
 
 		Args: func(a *grumble.Args) {
@@ -50,7 +56,13 @@ func init() {
 		},
 
 		Run: func(c *grumble.Context) error {
-			go StartListener(c.Args.String("host"), c.Flags.Int("port"), c.Flags.Bool("notls"))
+			cfg := ListenerConfig{
+				Addr:      fmt.Sprintf("%s:%d", c.Args.String("host"), c.Flags.Int("port")),
+				Plaintext: c.Flags.Bool("plaintext"),
+				Verbose:   c.Flags.Bool("verbose"),
+			}
+
+			go StartListener(&cfg)
 			return nil
 		},
 	})
@@ -62,6 +74,7 @@ func init() {
 
 		Flags: func(f *grumble.Flags) {
 			f.Int("s", "session", -1, " * the sesssion to execute the command to.")
+			f.BoolL("all", false, "runs the command on all sessions")
 		},
 
 		Args: func(a *grumble.Args) {
@@ -69,21 +82,39 @@ func init() {
 		},
 
 		Run: func(c *grumble.Context) error {
-			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSessionInCLI
-			}
-			sessionId := c.Flags.Int("session")
-			sessionObj, err := GetSession(sessionId)
-			if err != nil {
-				return err
-			}
+			cmd := strings.Join(c.Args.StringList("cmd"), " ")
 
-			go func(cmd string) {
-				err = sessionObj.WriteToCmd(cmd)
-				if err != nil {
-					cli.PrintError(err)
+			if c.Flags.Bool("all") {
+				for i := range sessions {
+					sessionObj, err := GetSession(i)
+					if err != nil {
+						return err
+					}
+					if sessionObj.Open {
+						go func() {
+							err := sessionObj.WriteToCmd(cmd)
+							if err != nil {
+								cli.PrintError(err)
+							}
+						}()
+					}
 				}
-			}(strings.Join(c.Args.StringList("cmd"), " "))
+			} else if c.Flags.Int("session") == -1 {
+				return ErrUndefinedSessionInCLI
+			} else {
+				sessionId := c.Flags.Int("session")
+				sessionObj, err := GetSession(sessionId)
+				if err != nil {
+					return err
+				}
+
+				go func() {
+					err = sessionObj.WriteToCmd(cmd)
+					if err != nil {
+						cli.PrintError(err)
+					}
+				}()
+			}
 
 			return nil
 		},

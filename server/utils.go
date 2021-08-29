@@ -10,7 +10,7 @@ import (
 func CloseListener() error {
 	var err error
 	if Listener != nil {
-		err = Listener.Close()
+		err = Listener.Server.Close()
 		Listener = nil
 	} else {
 		err = errors.New("There are not listeners running")
@@ -19,11 +19,7 @@ func CloseListener() error {
 }
 
 func IsListening() bool {
-	if Listener != nil {
-		return true
-	} else {
-		return false
-	}
+	return Listener != nil
 }
 
 func GetIP(r *http.Request) string {
