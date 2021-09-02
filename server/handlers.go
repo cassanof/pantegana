@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-
-	"github.com/i582/cfmt/cmd/cfmt"
 )
 
 // GetCmd handles the /getcmd endpoint and requests a
@@ -22,11 +20,11 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 		sessionObj, _ := GetSession(index)
 
 		if isNew {
-			cli.Print(cfmt.Sprintf("{{[+] New connection from %s with session id: %d\n}}::green", sessionObj.IP, index))
+			cli.Print(GreenF("[+] New connection from %s with session id: %d\n", sessionObj.IP, index))
 			// if the session is new, get the system information
 			fmt.Fprint(w, "__sysinfo__")
 		} else {
-			cli.Printf("[+] Got request for cmd from session id: %d\n", index)
+			fmt.Fprintf(listener.Cfg.VW, "[+] Got request for cmd from session id: %d\n", index)
 
 			sessionObj.Open = true
 
@@ -42,7 +40,7 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 					index, _ := CreateSession(req)
 					sessionObj, _ := GetSession(index)
 
-					cli.Print(cfmt.Sprintf("{{[-] Connection closed from session: %d\n}}::red", index))
+					cli.Print(RedF("[-] Connection closed from session: %d\n", index))
 
 					sessionObj.Open = false
 					w.WriteHeader(444) // 444 - Connection Closed Without Response
@@ -65,7 +63,7 @@ func CmdOutput(w http.ResponseWriter, req *http.Request) {
 		body, err := ioutil.ReadAll(req.Body)
 		defer req.Body.Close()
 		if err != nil {
-			cli.Print(cfmt.Sprintf("{{[-] Got error:\n%s\n}}::red", err))
+			cli.Print(RedF("[-] Got error:\n%s\n", err))
 			return
 		}
 
@@ -81,7 +79,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	// retrieve the file from the request
 	file, handler, err := req.FormFile("uploadFile")
 	if err != nil {
-		cli.Printf("[-] Error retrieving file: %s\n", err)
+		cli.Print(RedF("[-] Error retrieving file: %s\n", err))
 		return
 	}
 
@@ -89,7 +87,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	defer file.Close()
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		cli.Printf("[-] Error reading the uploaded file: %s\n", err)
+		cli.Print(RedF("[-] Error reading the uploaded file: %s\n", err))
 	}
 
 	// create uploads dir if not existant yet
@@ -97,9 +95,9 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	// read data into local file
 	err = ioutil.WriteFile("uploads/"+handler.Filename, bytes, 0755)
 	if err != nil {
-		cli.Printf("[-] Error creating and reading into local file: %s\n", err)
+		cli.Print(RedF("[-] Error creating and reading into local file: %s\n", err))
 	}
-	cli.Println("[+] Successfully uploaded file")
+	cli.Print(GreenF("[+] Successfully uploaded file"))
 	w.Header().Set("Connection", "close")
 	fmt.Fprintf(w, "Successfully uploaded file")
 }
@@ -109,8 +107,8 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	// get the filename from the request
 	filename := req.URL.Query().Get("file")
 	if filename == "" {
-		cli.Println("[-] Download request doesn't contain file name")
-		http.Error(w, "no file indicatd to download", 400)
+		cli.Print(RedF("[-] Download request doesn't contain file name"))
+		http.Error(w, "no file indicated to download", 400)
 		return
 	}
 	cli.Println("[+] Payload wants to download ", filename)
@@ -119,7 +117,7 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	file, err := os.Open(filename)
 	defer file.Close()
 	if err != nil {
-		cli.Printf("[-] Error trying to open file: %s\n", err)
+		cli.Print(RedF("[-] Error trying to open file: %s\n", err))
 		http.Error(w, "File not found", 404)
 		return
 	}
@@ -139,10 +137,10 @@ func FileDownload(w http.ResponseWriter, req *http.Request) {
 	// write file into request
 	_, err = io.Copy(w, file)
 	if err != nil {
-		cli.Printf("[-] Error writing file into response: %s\n", err)
+		cli.Print(RedF("[-] Error writing file into response: %s\n", err))
 		return
 	}
-	cli.Println("[+] Successfully downloaded file")
+	cli.Print(GreenF("[+] Successfully downloaded file\n"))
 	w.Header().Set("Connection", "close")
 	fmt.Fprintf(w, "Successfully downloaded file")
 }
@@ -152,7 +150,7 @@ func GetSysinfo(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		index := FindSessionIndexByToken(req.Header.Get("token"))
 		if index == -1 {
-			cli.Printf("[-] Error while getting session from token: %s\n", ErrUnrecognizedSessionToken)
+			cli.Print(RedF("[-] Error while getting session from token: %s\n", ErrUnrecognizedSessionToken))
 			return
 		}
 		body, _ := ioutil.ReadAll(req.Body)
@@ -162,7 +160,7 @@ func GetSysinfo(w http.ResponseWriter, req *http.Request) {
 
 		err := json.Unmarshal(body, &sessionObj.SysInfo)
 		if err != nil {
-			cli.Printf("[-] Error while parsing the JSON system information: %s\n", err)
+			cli.Print(RedF("[-] Error while parsing the JSON system information: %s\n", err))
 			return
 		}
 

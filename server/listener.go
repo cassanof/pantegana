@@ -3,9 +3,8 @@ package server
 import (
 	"crypto/tls"
 	"errors"
+	"io"
 	"net/http"
-
-	"github.com/i582/cfmt/cmd/cfmt"
 )
 
 //go:generate go-bindata -o cert.go ../cert/...
@@ -18,7 +17,7 @@ type Listener struct {
 type ListenerConfig struct {
 	Addr      string
 	Plaintext bool
-	Verbose   bool
+	VW        io.Writer // set this to io.Discard if --verbose flag is off
 }
 
 var listener *Listener = nil
@@ -27,12 +26,12 @@ func (cfg *ListenerConfig) SetupListener() *Listener {
 	// read cert binary data from bundled assets
 	certData, err := Asset("../cert/server.crt")
 	if err != nil {
-		cli.Print(cfmt.Sprintf("{{[-] Error reading cert file: %s\n}}::red", err))
+		cli.Print(RedF("[-] Error reading cert file: %s\n", err))
 	}
 	// read key binary data from bundled assets
 	keyData, err := Asset("../cert/server.key")
 	if err != nil {
-		cli.Print(cfmt.Sprintf("{{[-] Error reading cert file: %s\n}}::red", err))
+		cli.Print(RedF("[-] Error reading key file: %s\n", err))
 	}
 
 	// create the server with the custom pair
@@ -55,13 +54,14 @@ func (cfg *ListenerConfig) SetupListener() *Listener {
 func StartListener(cfg *ListenerConfig) {
 	// check if a listener is already running
 	if IsListening() {
-		cli.Print(cfmt.Sprintln("{{[-] A listener is already running.}}::red"))
+		cli.Print(RedF("[-] A listener is already running.\n"))
 		return
 	}
 
-	// start the listener
-	cli.Printf("[+] Listening on (%s)\n", cfg.Addr)
+	// setup listener the listener
 	listener = cfg.SetupListener()
+
+	cli.Print(GreenF("[+] Listening on (%s)\n", cfg.Addr))
 
 	var err error
 	if cfg.Plaintext {

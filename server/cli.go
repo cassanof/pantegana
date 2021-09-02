@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/desertbit/grumble"
@@ -22,6 +23,9 @@ var cli = grumble.New(&grumble.Config{
 		f.Bool("q", "quiet", false, "Disables ASCII start-up logo")
 	},
 })
+
+var RedF = color.New(color.FgRed).SprintfFunc()
+var GreenF = color.New(color.FgGreen).SprintfFunc()
 
 func init() {
 	cli.OnInit(func(a *grumble.App, flags grumble.FlagMap) error {
@@ -59,7 +63,7 @@ func init() {
 			cfg := ListenerConfig{
 				Addr:      fmt.Sprintf("%s:%d", c.Args.String("host"), c.Flags.Int("port")),
 				Plaintext: c.Flags.Bool("plaintext"),
-				Verbose:   c.Flags.Bool("verbose"),
+				VW:        (map[bool]io.Writer{true: cli.Stdout(), false: io.Discard})[c.Flags.Bool("verbose")], // Ternary operator hack
 			}
 
 			go StartListener(&cfg)
@@ -130,7 +134,7 @@ func init() {
 			if err != nil {
 				return err
 			}
-			cli.Println("[+] Listener successfully closed")
+			cli.Println(GreenF("[+] Listener successfully closed"))
 			return nil
 		},
 	})

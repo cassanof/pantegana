@@ -9,7 +9,7 @@ func RunServer() {
 	InitRoutes()
 	err := cli.Run()
 	if err != nil {
-		fmt.Printf("Error running the CLI: %v\n", err)
+		fmt.Print(RedF("Error running the CLI: %v\n", err))
 	}
 }
 
