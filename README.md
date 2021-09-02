@@ -12,6 +12,7 @@
 
 ## Features:
  - Pretty and clean interactive shell (using <a href="https://github.com/desertbit/grumble" target="_blank">grumble</a>)
+ - Cross-platform payload client (Windows, Linux, OSX)
  - HTTPS covert channel for communications
  - Undetected by AVs (behavioral AVs might detect it if its not running on port 443)
  - Direct command execution (not using bash or sh)
@@ -21,7 +22,7 @@
  - Gracefully closing sessions server-side on client-side crash
 
 ## TODO:
- - Full Windows and OSx integration (currently it's partial)
+ - Full Windows and OSX integration (currently it's partial)
  - bash/cmd/psh shell dropping
  - TOR routing?
  - Implement Twitter-Transfer-Protocol (<a href="https://github.com/elleven11/twitter-transfer-protocol" target="_blank">ttp</a>)
