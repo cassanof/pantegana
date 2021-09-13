@@ -13,7 +13,7 @@ func main() {
 		Port:        1337,
 		HasTLS:      true,  // for debug only
 		HasLogs:     true,  // disable this in "production"
-		AutoPersist: false, // enable for persistence on execution
+		AutoPersist: false, // enable for persistance on execution
 	}
 
 	client.RunClient(&cfg)
