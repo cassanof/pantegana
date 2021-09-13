@@ -93,11 +93,9 @@ func RunClient(cfg *ClientConfig) {
 
 	client := cfg.ClientSetup()
 
-	if cfg.AutoPersist {
-		err := client.SetupPersistence()
-		if err == nil {
-			go client.Persist()
-		}
+	err := client.SetupPersistence()
+	if cfg.AutoPersist && err == nil {
+		go client.Persist()
 	}
 
 	for {
