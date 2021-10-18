@@ -7,16 +7,14 @@ import (
 	"net/http"
 	"strings"
 	"sync"
-
-	client "github.com/elleven11/pantegana/client"
 )
 
 type Session struct {
 	Token   string
 	Cmd     chan string
 	Open    bool
-	IP      string // Could be both IPv4 and IPv6
-	SysInfo client.SysInfo
+	IP      string      // Could be both IPv4 and IPv6
+	SysInfo interface{} // expects a struct, golang pls give me generics
 }
 
 var sessions []Session

