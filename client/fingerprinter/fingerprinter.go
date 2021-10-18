@@ -24,7 +24,10 @@ func Run() {
 
 	var wg sync.WaitGroup
 
-	clientSysInfo.fingerprint(&wg)
+	for _, cmd := range commands {
+		wg.Add(1)
+		go cmd(&wg, &clientSysInfo)
+	}
 
 	// Wait for commands to finish
 	wg.Wait()
@@ -33,7 +36,7 @@ func Run() {
 	log.Println(string(dbg))
 }
 
-// Helper func to execute commadns, get output and handle errors
+// Helper func to execute commands, get output and handle errors
 func runCmdAndGetOutput(expect int, cmd string, args ...string) string {
 	out, err := exec.Command(cmd, args...).Output()
 	// if there is an error, it will return "unknown" as many times as the expect arg is defined as

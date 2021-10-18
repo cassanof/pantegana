@@ -17,6 +17,6 @@ type SysInfo struct {
 	}
 }
 
-// TODO: fingerprintWindows
-func (i *SysInfo) fingerprint(wg *sync.WaitGroup) {
-}
+// holds all of the command functions to run
+// TODO: make fingerprinter commands for windows
+var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){}

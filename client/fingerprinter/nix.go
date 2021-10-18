@@ -24,28 +24,40 @@ type SysInfo struct {
 	Kernel string `json:"kernel,omitempty"`
 }
 
-func (i *SysInfo) fingerprint(wg *sync.WaitGroup) {
-	wg.Add(5) // Set here the number of commands to execute
-	go func() {
-		outs := strings.SplitN(runCmdAndGetOutput(2, "uname", "-rn"), " ", 2)
-		i.Name = outs[0]
-		i.Kernel = outs[1]
-		defer wg.Done()
-	}()
-	go func() {
-		i.Distro = strings.SplitN(runCmdAndGetOutput(3, "lsb_release", "-d"), "\t", 2)[1]
-		defer wg.Done()
-	}()
-	go func() {
-		i.User.Name = runCmdAndGetOutput(1, "whoami")
-		defer wg.Done()
-	}()
-	go func() {
-		i.User.Id = runCmdAndGetOutput(1, "id", "-u")
-		defer wg.Done()
-	}()
-	go func() {
-		i.User.Groups = runCmdAndGetOutput(1, "groups")
-		defer wg.Done()
-	}()
+// holds all of the command functions to run
+var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){
+	uname,
+	distro,
+	whoami,
+	userId,
+	groups,
+}
+
+func uname(wg *sync.WaitGroup, i *SysInfo) {
+	outs := strings.SplitN(runCmdAndGetOutput(2, "uname", "-rn"), " ", 2)
+	i.Name = outs[0]
+	i.Kernel = outs[1]
+	defer wg.Done()
+}
+
+func distro(wg *sync.WaitGroup, i *SysInfo) {
+	outs := strings.SplitN(runCmdAndGetOutput(2, "uname", "-rn"), " ", 2)
+	i.Name = outs[0]
+	i.Kernel = outs[1]
+	defer wg.Done()
+}
+
+func whoami(wg *sync.WaitGroup, i *SysInfo) {
+	i.User.Name = runCmdAndGetOutput(1, "whoami")
+	defer wg.Done()
+}
+
+func userId(wg *sync.WaitGroup, i *SysInfo) {
+	i.User.Id = runCmdAndGetOutput(1, "id", "-u")
+	defer wg.Done()
+}
+
+func groups(wg *sync.WaitGroup, i *SysInfo) {
+	i.User.Groups = runCmdAndGetOutput(1, "groups")
+	defer wg.Done()
 }
