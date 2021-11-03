@@ -15,6 +15,20 @@ func GetCurrentSysInfo() SysInfo {
 	return clientSysInfo
 }
 
+/*
+// holds all of the command functions to run
+var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){
+	uname,
+	distro,
+	whoami,
+	userId,
+	groups,
+}
+*/
+
+// type declaration for the command functions
+type command func(wg *sync.WaitGroup, i *SysInfo)
+
 func Run() {
 	clientSysInfo = SysInfo{
 		// run `go tool dist list` to show all options

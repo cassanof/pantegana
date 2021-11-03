@@ -24,4 +24,4 @@ type SysInfo struct {
 
 // holds all of the command functions to run
 // TODO: make fingerprinter commands for osx
-var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){}
+var commands []command = []command{}

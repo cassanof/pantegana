@@ -25,7 +25,7 @@ type SysInfo struct {
 }
 
 // holds all of the command functions to run
-var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){
+var commands []command = []command{
 	uname,
 	distro,
 	whoami,
