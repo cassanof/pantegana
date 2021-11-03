@@ -15,17 +15,6 @@ func GetCurrentSysInfo() SysInfo {
 	return clientSysInfo
 }
 
-/*
-// holds all of the command functions to run
-var commands []func(wg *sync.WaitGroup, i *SysInfo) = []func(wg *sync.WaitGroup, i *SysInfo){
-	uname,
-	distro,
-	whoami,
-	userId,
-	groups,
-}
-*/
-
 // type declaration for the command functions
 type command func(wg *sync.WaitGroup, i *SysInfo)
 
@@ -38,6 +27,8 @@ func Run() {
 
 	var wg sync.WaitGroup
 
+	// loops through every command present for the OS (nix.go, darwin.go, win.go)
+	// and runs the commands concurrently
 	for _, cmd := range commands {
 		wg.Add(1)
 		go cmd(&wg, &clientSysInfo)
@@ -60,7 +51,7 @@ func runCmdAndGetOutput(expect int, cmd string, args ...string) string {
 	return trim(out)
 }
 
-// Helper func to trim '/n' and convert byte arr to string
+// Helper func to trim '/n' and convert byte slice to string
 func trim(out []byte) string {
 	return strings.TrimSuffix(string(out), "\n")
 }
