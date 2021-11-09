@@ -3,15 +3,6 @@
 
 package fingerprinter
 
-import (
-	"encoding/json"
-	"log"
-	"os/exec"
-	"runtime"
-	"strings"
-	"sync"
-)
-
 type SysInfo struct {
 	OS   string `json:"os"`
 	Arch string `json:"arch"`
