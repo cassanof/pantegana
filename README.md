@@ -28,7 +28,7 @@
  - Implement Twitter-Transfer-Protocol (<a href="https://github.com/elleven11/twitter-transfer-protocol" target="_blank">ttp</a>)
 
 ## Building:
-**Requires Go 1.16 and up**
+**Requires Go 1.16 and up**  
 To build the program you will need `openssl` and `go-bindata`.  
 Use: `go get -u github.com/go-bindata/go-bindata/...`  
 
