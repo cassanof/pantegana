@@ -32,13 +32,13 @@
 To build the program you will need `openssl` and `go-bindata`.  
 Use: `go get -u github.com/go-bindata/go-bindata/...`  
 
-By default the client is set to listen on `127.0.0.1:1337`.  
-To change that, you can edit the config object in to your liking `./main/client/main.go`  
+By default the client is set to dial `127.0.0.1:1337`.  
+To change that, you can edit the config object in to your liking (`./main/client/main.go`)  
 
 When running `make` you will need to specify any external IP or domain to include in the SSL certificate.  
 ***This is done to prevent people stealing your binary and using it with malicious intent.***  
 Example: `make IP=1.1.1.1 DOMAIN=example.com`.  
-By default the Makefile sets `IP=127.0.0.1` and `DOMAIN=localhost`. If you want to keep that you can just ommit the variables in the make command.  
+By default the Makefile sets `IP=127.0.0.1` and `DOMAIN=localhost`. If you want to keep that you can just omit the variables in the make command.  
 Example: `make`    
 You will find your client and server builds in the `out` directory.  
 
