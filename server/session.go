@@ -52,8 +52,8 @@ func CreateSession(req *http.Request) (int, bool) {
 		Open:  true,
 	})
 
-	mutex.Unlock()
-	return FindSessionIndexByToken(token), true
+	defer mutex.Unlock()
+	return len(sessions) - 1, true
 }
 
 func GetSession(idx int) (*Session, error) {
@@ -78,6 +78,10 @@ func FindSessionIndexByToken(token string) int {
 		}
 	}
 	return -1
+}
+
+func ClearSessions() {
+	sessions = []Session{}
 }
 
 func PrettyPrintSessions() {

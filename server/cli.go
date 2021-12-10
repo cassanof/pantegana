@@ -129,10 +129,17 @@ func init() {
 		Help:    "closes the listener",
 		Aliases: []string{"c"},
 
+		Flags: func(f *grumble.Flags) {
+			f.BoolL("clear", false, "deletes all the sessions from the server")
+		},
+
 		Run: func(c *grumble.Context) error {
 			err := CloseListener()
 			if err != nil {
 				return err
+			}
+			if c.Flags.Bool("clear") {
+				ClearSessions()
 			}
 			cli.Println(GreenF("[+] Listener successfully closed"))
 			return nil
