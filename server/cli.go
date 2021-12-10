@@ -20,7 +20,7 @@ var cli = grumble.New(&grumble.Config{
 	HelpSubCommands:       true,
 
 	Flags: func(f *grumble.Flags) {
-		f.Bool("q", "quiet", false, "Disables ASCII start-up logo")
+		f.Bool("q", "quiet", false, "disables ASCII start-up logo")
 	},
 })
 
