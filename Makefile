@@ -6,7 +6,7 @@ pantegana-dir := $(shell pwd)
 DOMAIN = localhost
 IP = 127.0.0.1
 
-all: gencert build-client-nix build-client-win build-server
+all: gencert build-client-nix build-server build-client-win
 
 # feel free to change the cert's details in -subj.
 gencert:
