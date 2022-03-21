@@ -27,7 +27,8 @@
 *.crt
 *.csr
 *.key
-cert.go
+./server/cert
+./client/cert
 *.ignore.*
 disabled/
 uploads/
