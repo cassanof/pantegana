@@ -2,12 +2,11 @@ package server
 
 import (
 	"crypto/tls"
+	_ "embed"
 	"errors"
 	"io"
 	"net/http"
 )
-
-//go:generate go-bindata -o cert.go ../cert/...
 
 type Listener struct {
 	Cfg    *ListenerConfig
@@ -22,20 +21,24 @@ type ListenerConfig struct {
 
 var listener *Listener = nil
 
-func (cfg *ListenerConfig) SetupListener() *Listener {
-	// read cert binary data from bundled assets
-	certData, err := Asset("../cert/server.crt")
-	if err != nil {
-		cli.Print(RedF("[-] Error reading cert file: %s\n", err))
-	}
-	// read key binary data from bundled assets
-	keyData, err := Asset("../cert/server.key")
-	if err != nil {
-		cli.Print(RedF("[-] Error reading key file: %s\n", err))
-	}
+// Load the cert and key
+//go:generate rm -fr cert
+//go:generate mkdir cert
+//go:generate cp ../cert/server.crt ./cert/
+//go:generate cp ../cert/server.key ./cert/
 
+//go:embed cert/server.crt
+var certData []byte
+
+//go:embed cert/server.key
+var keyData []byte
+
+func (cfg *ListenerConfig) SetupListener() *Listener {
 	// create the server with the custom pair
 	cert, err := tls.X509KeyPair(certData, keyData)
+	if err != nil {
+		cli.Print(RedF("[-] Error pairing cert with key: %s\n", err))
+	}
 	tlsConfig := &tls.Config{Certificates: []tls.Certificate{cert}}
 	server := http.Server{
 		Addr:      cfg.Addr,

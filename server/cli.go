@@ -56,7 +56,7 @@ func init() {
 		},
 
 		Args: func(a *grumble.Args) {
-			a.String("host", `a host to listen to (for ipv6 put in square brackets. eg: "[::1]")`, grumble.Default("localhost"))
+			a.String("host", `a host to listen to (for ipv6 put in square brackets. eg: "[::1]")`, grumble.Default("127.0.0.1"))
 		},
 
 		Run: func(c *grumble.Context) error {

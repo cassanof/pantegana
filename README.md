@@ -29,8 +29,7 @@
 
 ## Building:
 **Requires Go 1.16 and up**  
-To build the program you will need `openssl` and `go-bindata`.  
-Use: `go get -u github.com/go-bindata/go-bindata/...`  
+*To build the program you will also need `openssl`.*  
 
 By default the client is set to dial `127.0.0.1:1337`.  
 To change that, you can edit the config object in to your liking (`./main/client/main.go`)  

@@ -23,7 +23,6 @@ build-client-nix32: # does not get run by `all:`
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
-		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
 		GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s -w" -o client32.bin; \
 		mv client32.bin $(pantegana-dir)/out/client32.bin;
@@ -32,7 +31,6 @@ build-client-win32: # does not get run by `all:`
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
-		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
 		GOOS=windows GOARCH=386 go build -o client32.exe; \
 		mv client32.exe $(pantegana-dir)/out/client32.exe;
@@ -41,7 +39,6 @@ build-client-nix:
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
-		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
 		CGO_ENABLED=0 GOARCH=amd64 go build -ldflags="-s -w" -o client.bin; \
 		mv client.bin $(pantegana-dir)/out/client.bin;
@@ -50,7 +47,6 @@ build-client-win:
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
-		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
 		GOOS=windows GOARCH=amd64 go build -o client.exe; \
 		mv client.exe $(pantegana-dir)/out/client.exe;
@@ -59,7 +55,6 @@ build-server:
 	mkdir -p out; \
 		cd ./server/; \
 		go generate; \
-		sed -i "/^package main/c\package server" cert.go; \
 		cd ../main/server; \
 		CGO_ENABLED=0 go build -o server.bin; \
 		mv server.bin $(pantegana-dir)/out/server.bin;
@@ -67,14 +62,13 @@ build-server:
 clean:
 	rm -fr ./out; \
 		rm -fr ./cert; \
-		rm -f ./server/cert.go; \
-		rm -f ./client/cert.go;
+		rm -fr ./server/cert; \
+		rm -fr ./client/cert;
 
 run-client:
 	mkdir -p out;
 		cd ./client/; \
 		go generate; \
-		sed -i "/^package main/c\package client" cert.go; \
 		cd ../main/client/; \
 		go build -o client.bin; \
 		mv client.bin $(pantegana-dir)/out/client.bin; \
@@ -84,7 +78,6 @@ run-server:
 	mkdir -p out; \
 		cd ./server/; \
 		go generate; \
-		sed -i "/^package main/c\package server" cert.go; \
 		cd ../main/server; \
 		go build -o server.bin; \
 		mv server.bin $(pantegana-dir)/out/server.bin; \

