@@ -35,6 +35,8 @@ By default the client is set to dial `127.0.0.1:1337`.
 To change that, you can edit the config object in to your liking (`./main/client/main.go`)  
 
 When running `make` you will need to specify any external IP or domain to include in the SSL certificate.  
+This ip would be the public ip of the C2 server where the pantegana `server` binary would run.  
+If you don't know the public ip of your server: run `curl ip.me`, and you will be prompted with the ip.  
 ***This is done to prevent people stealing your binary and using it with malicious intent.***  
 Example: `make IP=1.1.1.1 DOMAIN=example.com`.  
 By default the Makefile sets `IP=127.0.0.1` and `DOMAIN=localhost`. If you want to keep that you can just omit the variables in the make command.  
@@ -43,7 +45,7 @@ You will find your client and server builds in the `out` directory.
 
 Check Makefile for additional build/running options  
 
-## Obfuscation of client
+## Obfuscation of the client
 There is a build option that allows the client to be obfuscated to reduce detection.  
 In order to do that, you will need to install `garble` with: `go install mvdan.cc/garble@latest`  
 and run the `make build-client-nix-garble` option.  
