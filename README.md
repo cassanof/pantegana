@@ -42,3 +42,8 @@ Example: `make`
 You will find your client and server builds in the `out` directory.  
 
 Check Makefile for additional build/running options  
+
+## Obfuscation of client
+There is a build option that allows the client to be obfuscated to reduce detection.  
+In order to do that, you will need to install `garble` with: `go install mvdan.cc/garble@latest`  
+and run the `make build-client-nix-garble` option.  

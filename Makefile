@@ -35,6 +35,15 @@ build-client-win32: # does not get run by `all:`
 		GOOS=windows GOARCH=386 go build -o client32.exe; \
 		mv client32.exe $(pantegana-dir)/out/client32.exe;
 
+build-client-nix-garble:
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		cd ../main/client/; \
+		CGO_ENABLED=0 GOARCH=amd64 garble build -ldflags="-s -w" -o client.bin; \
+		mv client.bin $(pantegana-dir)/out/client.bin;
+
+
 build-client-nix:
 	mkdir -p out;
 		cd ./client/; \
