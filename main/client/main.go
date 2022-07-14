@@ -1,7 +1,7 @@
 package main
 
 import (
-	client "github.com/elleven11/pantegana/client"
+	client "github.com/cassanof/pantegana/client"
 )
 
 func main() {

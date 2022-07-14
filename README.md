@@ -25,7 +25,7 @@
  - Full Windows and OSX integration (currently it's partial)
  - bash/cmd/psh shell dropping
  - TOR routing?
- - Implement Twitter-Transfer-Protocol (<a href="https://github.com/elleven11/twitter-transfer-protocol" target="_blank">ttp</a>)
+ - Implement Twitter-Transfer-Protocol (<a href="https://github.com/cassanof/twitter-transfer-protocol" target="_blank">ttp</a>)
 
 ## Building:
 **Requires Go 1.16 and up**  

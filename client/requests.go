@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/elleven11/pantegana/client/fingerprinter"
+	"github.com/cassanof/pantegana/client/fingerprinter"
 )
 
 // RequestCommand sends a HTTPS GET request to the master pantegana server

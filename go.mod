@@ -1,4 +1,4 @@
-module github.com/elleven11/pantegana
+module github.com/cassanof/pantegana
 
 go 1.16
 

@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/elleven11/pantegana/client/fingerprinter"
+	"github.com/cassanof/pantegana/client/fingerprinter"
 )
 
 // Middleware executes the corresponding function from the command that the Pantegana server sent
