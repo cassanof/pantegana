@@ -1,5 +1,6 @@
 # Pantegana - A Botnet RAT Made With Go
 ### <center>FOR EDUCATIONAL AND RESEARCH USE ONLY</center>  
+Usage of Pantegana for attacking targets without prior mutual consent is illegal. Developers assume no liability and are not responsible for any misuse or damage cause by this program.
 
 ```
    ___            _                               
