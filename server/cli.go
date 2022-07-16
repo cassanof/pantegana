@@ -172,29 +172,7 @@ func init() {
 		},
 
 		Run: func(c *grumble.Context) error {
-			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSessionInCLI
-			}
-			sessionId := c.Flags.Int("session")
-			sessionObj, err := GetSession(sessionId)
-			if err != nil {
-				return err
-			}
-
-			source := c.Args.String("source")
-			dest := c.Args.String("destname")
-			if dest == "" {
-				dest = source
-			}
-
-			go func() {
-				err = sessionObj.WriteToCmd(fmt.Sprintf("__upload__ %s %s", source, dest))
-				if err != nil {
-					cli.PrintError(err)
-				}
-			}()
-
-			return nil
+			return dlOrUpload(c, Upload)
 		},
 	})
 
@@ -213,29 +191,49 @@ func init() {
 		},
 
 		Run: func(c *grumble.Context) error {
-			if c.Flags.Int("session") == -1 {
-				return ErrUndefinedSessionInCLI
-			}
-			sessionId := c.Flags.Int("session")
-			sessionObj, err := GetSession(sessionId)
-			if err != nil {
-				return err
-			}
-
-			source := c.Args.String("source")
-			dest := c.Args.String("destname")
-			if dest == "" {
-				dest = source
-			}
-
-			go func() {
-				err = sessionObj.WriteToCmd(fmt.Sprintf("__download__ %s %s", source, dest))
-				if err != nil {
-					cli.PrintError(err)
-				}
-			}()
-
-			return nil
+			return dlOrUpload(c, Download)
 		},
 	})
+}
+
+type DownloadOrUpload = int
+
+const (
+	Download DownloadOrUpload = iota
+	Upload
+)
+
+// dlOrUpload is a helper function that handles both download and upload
+func dlOrUpload(c *grumble.Context, dlOrUp DownloadOrUpload) error {
+	if c.Flags.Int("session") == -1 {
+		return ErrUndefinedSessionInCLI
+	}
+	sessionId := c.Flags.Int("session")
+	sessionObj, err := GetSession(sessionId)
+	if err != nil {
+		return err
+	}
+
+	source := c.Args.String("source")
+	dest := c.Args.String("destname")
+	if dest == "" {
+		dest = source
+	}
+
+	go func() {
+		var cmd string
+		switch dlOrUp {
+		case Download:
+			cmd = fmt.Sprintf("__download__ %s %s", source, dest)
+		case Upload:
+			cmd = fmt.Sprintf("__upload__ %s %s", source, dest)
+		}
+		err = sessionObj.WriteToCmd(cmd)
+
+		if err != nil {
+			cli.PrintError(err)
+		}
+	}()
+
+	return nil
 }

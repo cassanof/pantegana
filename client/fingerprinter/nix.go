@@ -17,7 +17,7 @@ type SysInfo struct {
 		Name   string `json:"name"`
 		Id     string `json:"uid,omitempty"`    // *nix only
 		Groups string `json:"groups,omitempty"` // *nix only
-	}
+	} `json:"user"`
 
 	// *nix only
 	Distro string `json:"distro,omitempty"`

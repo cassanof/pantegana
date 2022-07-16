@@ -10,7 +10,7 @@ type SysInfo struct {
 
 	User struct {
 		Name string `json:"name"`
-	}
+	} `json:"user"`
 }
 
 // holds all of the command functions to run
