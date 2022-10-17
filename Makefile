@@ -60,6 +60,15 @@ build-client-win:
 		GOOS=windows GOARCH=amd64 go build -o client.exe; \
 		mv client.exe $(pantegana-dir)/out/client.exe;
 
+build-client-win-garble:
+	mkdir -p out;
+		cd ./client/; \
+		go generate; \
+		cd ../main/client/; \
+		GOOS=windows GOARCH=amd64 garble build -ldflags="-s -w" -o client.exe; \
+		mv client.exe $(pantegana-dir)/out/client.exe;
+
+
 build-server:
 	mkdir -p out; \
 		cd ./server/; \
