@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
@@ -55,7 +54,7 @@ func (c *Client) RequestCommand() string {
 
 	c.BaseURL = hoststr // Defining the BaseURL for the client
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("[-] Error while reading body of request: %s", err)
 	}

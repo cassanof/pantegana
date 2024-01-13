@@ -5,7 +5,7 @@ import (
 	"crypto/x509"
 	_ "embed"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/rand"
 	"net"
@@ -86,10 +86,9 @@ func (cfg *ClientConfig) ClientSetup() *Client {
 }
 
 func RunClient(cfg *ClientConfig) {
-
 	if !cfg.HasLogs {
 		log.SetFlags(0)
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	}
 
 	fingerprinter.Run()
