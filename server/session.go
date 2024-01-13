@@ -1,12 +1,10 @@
 package server
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"strings"
 	"sync"
+	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 type Session struct {
@@ -85,17 +83,27 @@ func ClearSessions() {
 }
 
 func PrettyPrintSessions() {
-	header := "||                          Sessions                          ||"
-	spacer := strings.Repeat("=", len(header))
-	output := fmt.Sprintf("%s\n%s\n%s\n", spacer, header, spacer)
+	t := table.NewWriter()
+	t.AppendHeader(table.Row{"id", "ip", "hostname", "user", "os", "arch", "kernel", "token"})
+	t.AppendSeparator()
+	t.SetStyle(table.StyleColoredDark)
 	for i, session := range sessions {
 		if session.Open {
-			fragment := fmt.Sprintf("|| ID: %d - IP: %s - Token: %s", i, session.IP, session.Token)
-			sessionInfo := fmt.Sprintf("%s%s||\n%s\n", fragment, strings.Repeat(" ", len(header)-len(fragment)-2), spacer)
-			json, _ := json.MarshalIndent(session.SysInfo, "", "\t")
-			sessionInfo = fmt.Sprintf("%s%s\n%s\n", sessionInfo, json, spacer)
-			output += sessionInfo
+			sysInfoMap, _ := session.SysInfo.(map[string]interface{})
+			userMap, _ := sysInfoMap["user"].(map[string]interface{})
+			t.AppendRows([]table.Row{
+				{
+					i,
+					session.IP,
+					sysInfoMap["name"],
+					userMap["name"],
+					sysInfoMap["os"],
+					sysInfoMap["arch"],
+					sysInfoMap["kernel"],
+					session.Token,
+				},
+			})
 		}
 	}
-	cli.Printf("%s", output)
+	cli.Printf("%s\n", t.Render())
 }
